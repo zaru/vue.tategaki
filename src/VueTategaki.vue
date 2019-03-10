@@ -9,7 +9,7 @@
 import HelloWorld from "./components/HelloWorld.vue";
 
 export default {
-  name: "app",
+  name: "VueTategaki",
   components: {
     HelloWorld
   }
