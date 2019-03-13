@@ -30,5 +30,23 @@
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0",
     "vue-template-compiler": "^2.5.21"
-  }
+  },
+  "description": "This library is still under development.",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaru/vue.tategaki.git"
+  },
+  "keywords": [
+    "vue",
+    "editor"
+  ],
+  "author": "zaru",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zaru/vue.tategaki/issues"
+  },
+  "homepage": "https://github.com/zaru/vue.tategaki#readme"
 }
