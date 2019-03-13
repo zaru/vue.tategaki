@@ -280,6 +280,16 @@ export default {
       this.defaultStyles.container.outline = false
       this.activeStyles.caret.display = 'none'
     },
+    selectedRange (e) {
+      if (ua.name === 'firefox') {
+        const range = document.createRange()
+        range.setStart(e.rangeParent, e.rangeOffset)
+        return range
+      } else if (ua.mobile && ua.os === 'OS X') {
+        return document.caretRangeFromPoint(e.clientX, e.clientY)
+      }
+      return this.currentSelectionAndRange().range
+    },
     selected (e) {
       // TODO: 文字列選択後、別の箇所をクリックすると textnode が分割されているため
       // ここで textnode 結合をしているが…クリックした時点でおそらく  window.getSelection() は決まってる
@@ -289,16 +299,7 @@ export default {
           this.mergeTextNode(e)
         })
       }
-      // TODO: refactor
-      let range
-      if (ua.name === 'firefox') {
-        range = document.createRange()
-        range.setStart(e.rangeParent, e.rangeOffset)
-      } else if (ua.mobile && ua.os === 'OS X') {
-        range = document.caretRangeFromPoint(e.clientX, e.clientY)
-      } else {
-        range = this.currentSelectionAndRange().range
-      }
+      const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startOffset === range.endOffset) {
         // MEMO: 選択中にクリックした場合は textnode が分割されているためマージさせる
@@ -421,13 +422,11 @@ export default {
       this.sync()
       this.setBlurAndDeselection()
     },
-    selectChange () {
+    hideHighlightMenu () {
       const sel = window.getSelection()
       // MEMO: 解除はここでやる、メニュー出現は preview 自身を select したときのみなので
       if (sel.rangeCount === 0) {
         this.activeStyles.highlightMenu.display = 'none'
-        // TODO: 分割された textnode をぜんぶマージ、パフォーマンス悪そう
-        // 本当は選択した位置の textnode だけをマージしたい。どこかにメモする？
         ;[...this.$refs.preview.childNodes].map(e => {
           this.mergeTextNode(e)
         })
@@ -449,12 +448,12 @@ export default {
     document.execCommand('DefaultParagraphSeparator', false, 'p')
     window.addEventListener('keydown', this.deleteSelectNode, true)
     window.addEventListener('mousewheel', this.disableSwipeBack)
-    document.addEventListener('selectionchange', this.selectChange)
+    document.addEventListener('selectionchange', this.hideHighlightMenu)
   },
   destroyed() {
     window.removeEventListener('keydown', this.deleteSelectNode, true)
     window.removeEventListener('mousewheel', this.disableSwipeBack)
-    document.removeEventListener('selectionchange', this.selectChange)
+    document.removeEventListener('selectionchange', this.hideHighlightMenu)
   }
 }
 </script>
