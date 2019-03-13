@@ -216,9 +216,9 @@ export default {
         // MEMO: 相対パスでの座標指定であってもスクローラブルな状態だと left:0 にしても左端に行くわけじゃないので
         // はみでたエディタ右は自分を計算してマイナスで調整している
         const parentRight = parentPos.width - parentLeft - viewerPos.width
-        const offset = target.className === 'tategaki-editable' ? 0 : 0
+        const offset = target.className === 'tategaki-editable' ? 0 : -28
         this.activeStyles.caret.top = `${pos.top - parentPos.top}px`
-        this.activeStyles.caret.left = anchorLeft - parentLeft - parentRight - 4 - offset + 'px'
+        this.activeStyles.caret.left = anchorLeft - parentLeft - parentRight - 28 - 4 - offset + 'px'
       }
     },
     getActiveRange (range, target) {
