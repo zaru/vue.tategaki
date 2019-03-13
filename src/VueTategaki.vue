@@ -472,7 +472,7 @@ export default {
   top: 0px;
   right: -28px;
   padding: 1rem;
-  opacity: 0.5;
+  opacity: 0;
 }
 .tategaki-preview {
   box-sizing: border-box;
