@@ -2,9 +2,10 @@
   <div id="app">
     <h1>Tategaki Editor example</h1>
     <vue-tategaki
-      content="<p>first content</p>"
+      content=""
       @updated="update"
-      :styles="styles"
+      :styles="styles1"
+      :placeholder="`place holder`"
     >
     </vue-tategaki>
   </div>
@@ -21,11 +22,20 @@ export default Vue.extend({
   },
   data () {
     return {
-      styles: {
+      styles1: {
+        container: {
+          width: '120px',
+          height: '500px',
+          fontSize: '44px',
+          multiline: false
+          // outline: false
+        }
+      },
+      styles2: {
         container: {
           width: '500px',
           height: '500px',
-          multiline: false
+          multiline: true
           // outline: false
         }
       }

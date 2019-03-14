@@ -6,7 +6,8 @@
       :style="containerStyle"
     >
       <div
-        contenteditable="true" class="tategaki-editable"
+        contenteditable="true"
+        class="tategaki-editable"
         v-html="editContent"
         ref="editable"
         @compositionstart="compositionstart"
@@ -23,6 +24,8 @@
 
       <div
         class="tategaki-preview"
+        :data-placeholder="placeholder"
+        data-placeholderactive="true"
         :contenteditable="previewEditable"
         v-html="contentHtml"
         ref="preview"
@@ -54,6 +57,9 @@ export default {
     },
     styles: {
       type: Object
+    },
+    placeholder: {
+      type: String
     }
   },
   data () {
@@ -165,7 +171,7 @@ export default {
           }
         })
         return e.outerHTML
-      }).join('')
+      }).join('').replace('&#8203;', '')
     },
     currentSelectionAndRange () {
       const sel = window.getSelection()
@@ -184,8 +190,13 @@ export default {
       // テキスト以外のエディタ部分をクリックした場合は、フォーカスを末尾へ
       if (e.target.className === 'tategaki-preview') {
         const p = this.$refs.editable.childNodes[this.$refs.editable.childNodes.length - 1]
-        const t = p.childNodes[p.childNodes.length - 1]
-        this.activeFocus(t, t.length)
+        console.log('Class: , Function: , Line 191 p.childNodes: ', p.childNodes)
+        if (p.childNodes.length) {
+          const t = p.childNodes[p.childNodes.length - 1]
+          this.activeFocus(t, t.length)
+        } else {
+          this.activeFocus(p, 0)
+        }
         this.moveCaret(this.$refs.editable, range)
       } else {
         this.moveCaret(e.target, range)
@@ -291,6 +302,8 @@ export default {
       return this.currentSelectionAndRange().range
     },
     selected (e) {
+      // TODO: refactor
+      this.$refs.preview.dataset.placeholderactive = false
       // TODO: 文字列選択後、別の箇所をクリックすると textnode が分割されているため
       // ここで textnode 結合をしているが…クリックした時点でおそらく  window.getSelection() は決まってる
       // 謎
@@ -443,8 +456,14 @@ export default {
     this.activeStyles = merge(this.defaultStyles, this.styles)
   },
   mounted() {
-    this.previewContent = this.content
-    this.innerContent = this.content
+    if (!this.content) {
+      this.previewContent = '<p>&#8203;</p>'
+      this.innerContent = '<p>&#8203;</p>'
+    } else {
+      this.$refs.preview.dataset.placeholderactive = false
+      this.previewContent = this.content
+      this.innerContent = this.content
+    }
     document.execCommand('DefaultParagraphSeparator', false, 'p')
     window.addEventListener('keydown', this.deleteSelectNode, true)
     window.addEventListener('mousewheel', this.disableSwipeBack)
@@ -458,19 +477,24 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .tategaki-container {
   overflow: scroll;
   position: relative;
   word-break: break-all;
   writing-mode: vertical-rl;
 }
+.tategaki-container p {
+  margin: 0;
+  padding: 0;
+}
 .tategaki-editable {
   box-sizing: border-box;
   position: absolute;
   z-index: 2;
   top: 0px;
-  right: -28px;
+  /*right: -28px;*/
+  right: 0;
   padding: 1rem;
   opacity: 0;
 }
@@ -482,6 +506,10 @@ export default {
   right: 0px;
   opacity: 1;
   padding: 1rem;
+}
+[data-placeholder][data-placeholderactive=true]:before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
 }
 .tategaki-editable, .tategaki-preview {
   user-select: text;
