@@ -8,13 +8,14 @@
       <div
         contenteditable="true"
         class="tategaki-editable"
+        data-key="editor"
         v-html="editContent"
         ref="editable"
+        :style="editableStyle"
         @compositionstart="compositionstart"
         @compositionend="compositionend"
         @input="sync"
         @keyup.exact="editorKeyUp"
-        @keyup.enter="scrollLeft"
         @keydown.ctrl.65="selectAll"
         @keydown.meta.65="selectAll"
         @keydown.enter.exact="disableBreakLine"
@@ -24,6 +25,7 @@
 
       <div
         class="tategaki-preview"
+        data-key="editor"
         :data-placeholder="placeholder"
         data-placeholderactive="true"
         :contenteditable="previewEditable"
@@ -67,7 +69,7 @@ export default {
       activeStyles: {},
       defaultStyles: {
         container: {
-          width: '100%',
+          minWidth: '100%',
           height: '100%',
           outline: true,
           boxShadow: '0 0 5px 0px rgba(0, 123, 255, .4)',
@@ -109,6 +111,9 @@ export default {
       }
       return this.selecting || this.focusing
     },
+    offsetRight () {
+      return parseInt(this.activeStyles.container.fontSize) * 1.5
+    },
     caretStyle () {
       return {
         display: this.activeStyles.caret.display,
@@ -120,9 +125,14 @@ export default {
     containerStyle () {
       return {
         fontSize: this.activeStyles.container.fontSize,
-        width: this.activeStyles.container.width,
+        minWidth: this.activeStyles.container.minWidth,
         height: this.activeStyles.container.height,
         boxShadow: this.styleContainerOutline ? this.activeStyles.container.boxShadow : ''
+      }
+    },
+    editableStyle () {
+      return {
+        right: `-${this.offsetRight}px`
       }
     },
     highlightMenuStyle () {
@@ -197,6 +207,7 @@ export default {
         } else {
           this.activeFocus(p, 0)
         }
+        console.log('Class: , Function: , Line 206 range: ', range)
         this.moveCaret(this.$refs.editable, range)
       } else {
         this.moveCaret(e.target, range)
@@ -217,6 +228,7 @@ export default {
         // MEMO: 先頭に空の span いれると座標がずれるため zero-width-space 入れる
         anchor.innerText = '&#8203;'
         range.insertNode(anchor)
+        const parent = anchor.closest('[data-key=editor]')
         const pos = anchor.getBoundingClientRect()
         anchor.parentElement.removeChild(anchor)
         const parentPos = this.$refs.preview.getBoundingClientRect()
@@ -227,9 +239,9 @@ export default {
         // MEMO: 相対パスでの座標指定であってもスクローラブルな状態だと left:0 にしても左端に行くわけじゃないので
         // はみでたエディタ右は自分を計算してマイナスで調整している
         const parentRight = parentPos.width - parentLeft - viewerPos.width
-        const offset = target.className === 'tategaki-editable' ? 0 : -28
+        const offset = parent.className === 'tategaki-editable' ? this.offsetRight : 0
         this.activeStyles.caret.top = `${pos.top - parentPos.top}px`
-        this.activeStyles.caret.left = anchorLeft - parentLeft - parentRight - 28 - 4 - offset + 'px'
+        this.activeStyles.caret.left = anchorLeft - parentLeft - parentRight - 4 - offset + 'px'
       }
     },
     getActiveRange (range, target) {
@@ -406,16 +418,6 @@ export default {
         e.preventDefault()
       }
     },
-    scrollLeft () {
-      // MEMO: 改行したときに少しだけ横スクロールしてテキストが隠れないようにする
-      if (!this.isComposing) {
-        const cursorRect = this.$refs.caret.getBoundingClientRect()
-        const containerRect = this.$refs.container.getBoundingClientRect()
-        if (cursorRect.x - containerRect.x < containerRect.width / 2) {
-          this.$refs.container.scrollLeft -= 30
-        }
-      }
-    },
     toBold () {
       // MEMO: preview 自体を一時的に contenteditable にして execCommand が効くようにして再代入している
       document.execCommand('bold')
@@ -479,7 +481,6 @@ export default {
 
 <style>
 .tategaki-container {
-  overflow: scroll;
   position: relative;
   word-break: break-all;
   writing-mode: vertical-rl;
@@ -493,19 +494,13 @@ export default {
   position: absolute;
   z-index: 2;
   top: 0px;
-  /*right: -28px;*/
-  right: 0;
-  padding: 1rem;
   opacity: 0;
+  color: #f00;
+  background-color: #ddd;
 }
 .tategaki-preview {
   box-sizing: border-box;
-  position: absolute;
-  z-index: 3;
-  top: 0px;
-  right: 0px;
   opacity: 1;
-  padding: 1rem;
 }
 [data-placeholder][data-placeholderactive=true]:before {
   content: attr(data-placeholder);
