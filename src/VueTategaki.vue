@@ -92,14 +92,10 @@ export default {
       previewContent: '',
       compositing: false,
       selecting: false,
-      focusing: false,
-      placeholderActive: true
+      focusing: false
     }
   },
   computed: {
-    syncedContent () {
-      return this.previewContent
-    },
     editContent () {
       return this.indexedHtml(this.innerContent)
     },
@@ -147,10 +143,7 @@ export default {
       }
     },
     placeholderStatus () {
-      if (this.contentHtml === '<p data-key="0">​</p>') {
-        return true
-      }
-      return false
+      return this.contentHtml === '<p data-key="0">​</p>'
     }
   },
   methods: {
@@ -169,12 +162,6 @@ export default {
     setBlurAndDeselection () {
       this.focusing = false
       this.selecting = false
-    },
-    hidePlaceHolder () {
-      this.placeholderActive = false
-    },
-    showPlaceHolder () {
-      this.placeholderActive = true
     },
     indexedHtml (content) {
       const div = document.createElement('div')
@@ -334,7 +321,6 @@ export default {
       return this.currentSelectionAndRange().range
     },
     selected (e) {
-      this.hidePlaceHolder()
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startOffset === range.endOffset) {
@@ -399,7 +385,6 @@ export default {
         // MEMO: 全て消した場合、なにもないと入力できないので zero-width-space を入れる
         if (!this.$refs.preview.innerText) {
           this.$refs.preview.innerHTML = '<p>&#8203;</p>'
-          this.showPlaceHolder()
         }
 
         // MEMO: ここで editor の DOM を全部もとに戻す、こうすうことで re-render させずに node を戻せるっぽい
@@ -478,7 +463,6 @@ export default {
       this.previewContent = '<p>&#8203;</p>'
       this.innerContent = '<p>&#8203;</p>'
     } else {
-      this.hidePlaceHolder()
       this.previewContent = this.content
       this.innerContent = this.content
     }
