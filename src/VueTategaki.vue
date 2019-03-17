@@ -27,7 +27,7 @@
         class="tategaki-preview"
         data-key="editor"
         :data-placeholder="placeholder"
-        data-placeholderactive="true"
+        :data-placeholderactive="placeholderStatus"
         :contenteditable="previewEditable"
         v-html="contentHtml"
         ref="preview"
@@ -92,10 +92,14 @@ export default {
       previewContent: '',
       compositing: false,
       selecting: false,
-      focusing: false
+      focusing: false,
+      placeholderActive: true
     }
   },
   computed: {
+    syncedContent () {
+      return this.previewContent
+    },
     editContent () {
       return this.indexedHtml(this.innerContent)
     },
@@ -141,6 +145,12 @@ export default {
         left: this.activeStyles.highlightMenu.left,
         display: this.activeStyles.highlightMenu.display
       }
+    },
+    placeholderStatus () {
+      if (this.contentHtml === '<p data-key="0">​</p>') {
+        return true
+      }
+      return false
     }
   },
   methods: {
@@ -153,9 +163,18 @@ export default {
     setSelection () {
       this.selecting = true
     },
+    setDeselection () {
+      this.selecting = false
+    },
     setBlurAndDeselection () {
       this.focusing = false
       this.selecting = false
+    },
+    hidePlaceHolder () {
+      this.placeholderActive = false
+    },
+    showPlaceHolder () {
+      this.placeholderActive = true
     },
     indexedHtml (content) {
       const div = document.createElement('div')
@@ -200,14 +219,12 @@ export default {
       // テキスト以外のエディタ部分をクリックした場合は、フォーカスを末尾へ
       if (e.target.className === 'tategaki-preview') {
         const p = this.$refs.editable.childNodes[this.$refs.editable.childNodes.length - 1]
-        console.log('Class: , Function: , Line 191 p.childNodes: ', p.childNodes)
         if (p.childNodes.length) {
           const t = p.childNodes[p.childNodes.length - 1]
           this.activeFocus(t, t.length)
         } else {
           this.activeFocus(p, 0)
         }
-        console.log('Class: , Function: , Line 206 range: ', range)
         this.moveCaret(this.$refs.editable, range)
       } else {
         this.moveCaret(e.target, range)
@@ -293,6 +310,9 @@ export default {
           return node.dataset && node.dataset.key === key
         })
       }
+      if (!targetNode) {
+        targetNode = this.$refs.editable.childNodes[0]
+      }
       this.activeFocus(targetNode.childNodes[activeRange.index], activeRange.startOffset)
     },
     focus () {
@@ -314,35 +334,29 @@ export default {
       return this.currentSelectionAndRange().range
     },
     selected (e) {
-      // TODO: refactor
-      this.$refs.preview.dataset.placeholderactive = false
-      // TODO: 文字列選択後、別の箇所をクリックすると textnode が分割されているため
-      // ここで textnode 結合をしているが…クリックした時点でおそらく  window.getSelection() は決まってる
-      // 謎
-      if (this.selecting) {
-        ;[...this.$refs.preview.childNodes].map(e => {
-          this.mergeTextNode(e)
-        })
-      }
+      this.hidePlaceHolder()
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startOffset === range.endOffset) {
+        this.setDeselection()
         // MEMO: 選択中にクリックした場合は textnode が分割されているためマージさせる
         this.setFocus()
         this.focusAndMoveCaret(e, range)
-      } else if (this.activeStyles.highlightMenu.enable) {
+      } else {
         this.setSelection()
 
         // MEMO: 選択した位置の textnode 座標を算出
         // メニューの表示位置に利用している
-        const anchor = document.createElement('span')
-        anchor.innerText = '&#8203;'
-        range.insertNode(anchor)
-        const pos = anchor.getBoundingClientRect()
-        anchor.parentElement.removeChild(anchor)
-        this.activeStyles.highlightMenu.display = 'block'
-        this.activeStyles.highlightMenu.top = `${pos.y}px`
-        this.activeStyles.highlightMenu.left = `${pos.x + 30}px`
+        if (this.activeStyles.highlightMenu.enable) {
+          const anchor = document.createElement('span')
+          anchor.innerText = '&#8203;'
+          range.insertNode(anchor)
+          const pos = anchor.getBoundingClientRect()
+          anchor.parentElement.removeChild(anchor)
+          this.activeStyles.highlightMenu.display = 'block'
+          this.activeStyles.highlightMenu.top = `${pos.y}px`
+          this.activeStyles.highlightMenu.left = `${pos.x + 30}px`
+        }
       }
     },
     pasteText (e) {
@@ -385,10 +399,12 @@ export default {
         // MEMO: 全て消した場合、なにもないと入力できないので zero-width-space を入れる
         if (!this.$refs.preview.innerText) {
           this.$refs.preview.innerHTML = '<p>&#8203;</p>'
+          this.showPlaceHolder()
         }
 
         // MEMO: ここで editor の DOM を全部もとに戻す、こうすうことで re-render させずに node を戻せるっぽい
         this.$refs.editable.innerHTML = this.$refs.preview.innerHTML
+        this.sync()
         this.focusEditor(activeRange)
         this.setBlurAndDeselection()
       }
@@ -462,7 +478,7 @@ export default {
       this.previewContent = '<p>&#8203;</p>'
       this.innerContent = '<p>&#8203;</p>'
     } else {
-      this.$refs.preview.dataset.placeholderactive = false
+      this.hidePlaceHolder()
       this.previewContent = this.content
       this.innerContent = this.content
     }
@@ -505,6 +521,7 @@ export default {
 [data-placeholder][data-placeholderactive=true]:before {
   content: attr(data-placeholder);
   opacity: 0.5;
+  position: absolute;
 }
 .tategaki-editable, .tategaki-preview {
   user-select: text;

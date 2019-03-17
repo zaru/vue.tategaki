@@ -5,7 +5,7 @@
       <p>aaaaaaaaaaaaaa</p>
     </div>
     <vue-tategaki
-      content=""
+      content="<p>abcedfg</p>"
       @updated="update"
       :styles="styles1"
       :placeholder="`place holder`"
