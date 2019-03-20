@@ -1,6 +1,6 @@
 {
   "name": "vue.tategaki",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": false,
   "main": "dist/vuetategaki.umd.min.js",
   "module": "dist/vuetategaki.common.js",
