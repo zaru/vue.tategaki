@@ -492,7 +492,7 @@ export default {
 .tategaki-editable {
   box-sizing: border-box;
   position: absolute;
-  z-index: 2;
+  z-index: -1;
   top: 0px;
   opacity: 0;
   color: #f00;
