@@ -510,6 +510,7 @@ export default {
 .tategaki-editable, .tategaki-preview {
   user-select: text;
   -webkit-user-select: text;
+  caret-color: transparent;
 }
 
 .caret {
