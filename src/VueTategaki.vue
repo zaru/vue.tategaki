@@ -1,5 +1,8 @@
 <template>
-  <div class="tategaki">
+  <div class="tategaki"
+    :style="boxStyle"
+  >
+    <button v-show="editing" class="tategaki-input-done" @click="done">done</button>
     <div
       class="tategaki-container"
       ref="container"
@@ -66,11 +69,27 @@ export default {
   },
   data () {
     return {
+      editing: false,
       activeStyles: {},
       defaultStyles: {
+        box: {
+          height: 'auto',
+          position: 'static',
+          top: '0',
+          left: '0',
+          right: '0',
+          bottom: '0',
+          background: 'auto',
+          zIndex: '9999'
+        },
         container: {
           minWidth: '100%',
           height: '100%',
+          position: 'relative',
+          top: '0',
+          left: '0',
+          right: '0',
+          bottom: '0',
           outline: true,
           boxShadow: '0 0 5px 0px rgba(0, 123, 255, .4)',
           fontSize: '16px',
@@ -88,6 +107,8 @@ export default {
           display: 'none'
         }
       },
+      originalContainerHeight: '',
+      iOSKeyboardHeight: '420px',
       innerContent: '',
       previewContent: '',
       compositing: false,
@@ -122,11 +143,28 @@ export default {
         left: this.activeStyles.caret.left
       }
     },
+    boxStyle () {
+      return {
+        height: this.activeStyles.box.height,
+        position: this.activeStyles.box.position,
+        top: this.activeStyles.box.top,
+        left: this.activeStyles.box.left,
+        right: this.activeStyles.box.right,
+        bottom: this.activeStyles.box.bottom,
+        background: this.activeStyles.box.background,
+        zIndex: this.activeStyles.box.zIndex
+      }
+    },
     containerStyle () {
       return {
         fontSize: this.activeStyles.container.fontSize,
         minWidth: this.activeStyles.container.minWidth,
         height: this.activeStyles.container.height,
+        position: this.activeStyles.container.position,
+        top: this.activeStyles.container.top,
+        left: this.activeStyles.container.left,
+        right: this.activeStyles.container.right,
+        bottom: this.activeStyles.container.bottom,
         boxShadow: this.styleContainerOutline ? this.activeStyles.container.boxShadow : ''
       }
     },
@@ -320,10 +358,36 @@ export default {
       }
       return this.currentSelectionAndRange().range
     },
+    dontScroll () {
+      // TODO: 横スクロールのみ許可して、縦スクロールは禁止したい
+    },
+    fullScreenForMobile () {
+      this.activeStyles.container.height = `calc(100% - ${this.iOSKeyboardHeight})`
+      this.activeStyles.box.height = '100%'
+      this.activeStyles.box.position = 'fixed'
+      this.activeStyles.box.background = '#fff'
+      this.activeStyles.container.position = 'fixed'
+      document.addEventListener('touchmove', this.dontScroll, { passive: false })
+    },
+    restoreScreenForMobile () {
+      this.activeStyles.box.height = 'auto'
+      this.activeStyles.container.height = this.originalContainerHeight
+      this.activeStyles.box.position = 'static'
+      this.activeStyles.box.background = 'none'
+      this.activeStyles.container.position = 'relative'
+      document.removeEventListener('touchmove', this.dontScroll, { passive: false })
+    },
+    done () {
+      this.restoreScreenForMobile()
+      this.editing = false
+    },
     selected (e) {
+      console.log('selected')
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startOffset === range.endOffset) {
+        this.editing = true
+        this.fullScreenForMobile()
         this.setDeselection()
         // MEMO: 選択中にクリックした場合は textnode が分割されているためマージさせる
         this.setFocus()
@@ -457,6 +521,7 @@ export default {
   },
   created() {
     this.activeStyles = merge(this.defaultStyles, this.styles)
+    this.originalContainerHeight = this.activeStyles.container.height
   },
   mounted() {
     if (!this.content) {
@@ -484,6 +549,7 @@ export default {
   position: relative;
   word-break: break-all;
   writing-mode: vertical-rl;
+  overflow-x: scroll;
 }
 .tategaki-container p {
   margin: 0;
@@ -549,5 +615,13 @@ export default {
   color: #fff;
   font-weight: bold;
   border: 0;
+}
+
+.tategaki-input-done {
+  position: fixed;
+  top: 5px;
+  left: 5px;
+  z-index: 10000;
+  font-size: 24px;
 }
 </style>
