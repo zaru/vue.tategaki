@@ -1,6 +1,7 @@
 <template>
   <div class="tategaki"
-    :style="boxStyle"
+       ref="box"
+       :style="boxStyle"
   >
     <button v-show="editing" class="tategaki-input-done" @click="done">done</button>
     <div
@@ -86,7 +87,7 @@ export default {
           minWidth: '100%',
           height: '100%',
           position: 'relative',
-          top: '0',
+          top: '10px',
           left: '0',
           right: '0',
           bottom: '0',
@@ -108,7 +109,7 @@ export default {
         }
       },
       originalContainerHeight: '',
-      iOSKeyboardHeight: '420px',
+      iOSKeyboardHeight: '450px',
       innerContent: '',
       previewContent: '',
       compositing: false,
@@ -139,6 +140,7 @@ export default {
       return {
         display: this.activeStyles.caret.display,
         width: `${parseInt(this.activeStyles.container.fontSize) * 1.4}px`,
+        height: '1px',
         top: this.activeStyles.caret.top,
         left: this.activeStyles.caret.left
       }
@@ -267,8 +269,8 @@ export default {
       } else {
         this.activeStyles.caret.display = 'block'
         const anchor = document.createElement('span')
-        // MEMO: 先頭に空の span いれると座標がずれるため zero-width-space 入れる
-        anchor.innerText = '&#8203;'
+        // MEMO: 改行したとき、先頭に空の span いれると座標がずれるため zero-width-space 入れる
+        anchor.innerHTML = '&#8203;'
         range.insertNode(anchor)
         const parent = anchor.closest('[data-key=editor]')
         const pos = anchor.getBoundingClientRect()
@@ -381,17 +383,33 @@ export default {
       this.restoreScreenForMobile()
       this.editing = false
     },
+    waitingPaintAndFocusForMobileSafari (e, range) {
+      const target = this.$refs.box
+      const observer = new MutationObserver(() => {
+        this.focusAndMoveCaret(e, range)
+      })
+      const options = {
+        attributes: true,
+        attributeFilter: ['style']
+      }
+      observer.observe(target, options)
+    },
     selected (e) {
-      console.log('selected')
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startOffset === range.endOffset) {
         this.editing = true
-        this.fullScreenForMobile()
+        //監視ターゲットの取得
+        if (ua.mobile && ua.name === 'safari' && this.activeStyles.box.position !== 'fixed') {
+          this.waitingPaintAndFocusForMobileSafari(e, range)
+        } else {
+          this.focusAndMoveCaret(e, range)
+        }
+        if (ua.mobile && ua.name === 'safari') {
+          this.fullScreenForMobile()
+        }
         this.setDeselection()
-        // MEMO: 選択中にクリックした場合は textnode が分割されているためマージさせる
         this.setFocus()
-        this.focusAndMoveCaret(e, range)
       } else {
         this.setSelection()
 
