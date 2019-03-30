@@ -87,7 +87,7 @@ export default {
           minWidth: '100%',
           height: '100%',
           position: 'relative',
-          top: '10px',
+          top: '30px',
           left: '0',
           right: '0',
           bottom: '0',
@@ -172,7 +172,7 @@ export default {
     },
     editableStyle () {
       return {
-        right: `-${this.offsetRight}px`
+        right: '-10px'
       }
     },
     highlightMenuStyle () {
@@ -272,6 +272,7 @@ export default {
         // MEMO: 改行したとき、先頭に空の span いれると座標がずれるため zero-width-space 入れる
         anchor.innerHTML = '&#8203;'
         range.insertNode(anchor)
+        // TODO: 消すか判断する
         const parent = anchor.closest('[data-key=editor]')
         const pos = anchor.getBoundingClientRect()
         anchor.parentElement.removeChild(anchor)
@@ -283,7 +284,8 @@ export default {
         // MEMO: 相対パスでの座標指定であってもスクローラブルな状態だと left:0 にしても左端に行くわけじゃないので
         // はみでたエディタ右は自分を計算してマイナスで調整している
         const parentRight = parentPos.width - parentLeft - viewerPos.width
-        const offset = parent.className === 'tategaki-editable' ? this.offsetRight : 0
+        // const offset = parent.className === 'tategaki-editable' ? this.offsetRight : 0
+        const offset = 0
         this.activeStyles.caret.top = `${pos.top - parentPos.top}px`
         this.activeStyles.caret.left = anchorLeft - parentLeft - parentRight - 4 - offset + 'px'
       }
@@ -323,7 +325,12 @@ export default {
       editorRange.collapse(true)
       editorSel.removeAllRanges()
       editorSel.addRange(editorRange)
+      this.$refs.editable.style.background = '#000'
       this.$refs.editable.focus()
+      // TODO: キーボードがせり上がったときの高さ調整及びスクロールさせないための何かが必要
+      if (ua.mobile && ua.name === 'safari') {
+        this.activeStyles.container.height = `160px`
+      }
     },
     focusEditor (activeRange) {
       // 指定された node と offset から editor node を探索して focus させる
@@ -364,7 +371,10 @@ export default {
       // TODO: 横スクロールのみ許可して、縦スクロールは禁止したい
     },
     fullScreenForMobile () {
-      this.activeStyles.container.height = `calc(100% - ${this.iOSKeyboardHeight})`
+      document.body.appendChild(this.$refs.box)
+      //
+      // this.activeStyles.container.height = `calc(100% - ${this.iOSKeyboardHeight})`
+      this.activeStyles.container.height = '100%'
       this.activeStyles.box.height = '100%'
       this.activeStyles.box.position = 'fixed'
       this.activeStyles.box.background = '#fff'
@@ -387,6 +397,7 @@ export default {
       const target = this.$refs.box
       const observer = new MutationObserver(() => {
         this.focusAndMoveCaret(e, range)
+        observer.disconnect()
       })
       const options = {
         attributes: true,
@@ -398,15 +409,13 @@ export default {
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startOffset === range.endOffset) {
-        this.editing = true
         //監視ターゲットの取得
         if (ua.mobile && ua.name === 'safari' && this.activeStyles.box.position !== 'fixed') {
+          this.editing = true
           this.waitingPaintAndFocusForMobileSafari(e, range)
+          this.fullScreenForMobile()
         } else {
           this.focusAndMoveCaret(e, range)
-        }
-        if (ua.mobile && ua.name === 'safari') {
-          this.fullScreenForMobile()
         }
         this.setDeselection()
         this.setFocus()
@@ -567,6 +576,7 @@ export default {
   position: relative;
   word-break: break-all;
   writing-mode: vertical-rl;
+  overflow-y: hidden;
   overflow-x: scroll;
 }
 .tategaki-container p {
@@ -578,7 +588,7 @@ export default {
   position: absolute;
   z-index: -1;
   top: 0px;
-  opacity: 0;
+  opacity: 0.5;
   color: #f00;
   background-color: #ddd;
 }
@@ -594,7 +604,7 @@ export default {
 .tategaki-editable, .tategaki-preview {
   user-select: text;
   -webkit-user-select: text;
-  caret-color: transparent;
+  /*caret-color: transparent;*/
 }
 
 .caret {
