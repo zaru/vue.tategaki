@@ -3,7 +3,7 @@
        ref="box"
        :style="boxStyle"
   >
-    <button v-show="editing" class="tategaki-input-done" @click="done">done</button>
+    <button v-show="editing" class="tategaki-input-done" @click="done">🔙️</button>
     <div
       class="tategaki-container"
       ref="container"
@@ -87,12 +87,14 @@ export default {
           minWidth: '100%',
           height: '100%',
           position: 'relative',
-          top: '30px',
+          top: '10px',
           left: '0',
           right: '0',
           bottom: '0',
           outline: false,
-          boxShadow: '0 0 5px 0px rgba(0, 123, 255, .4)',
+          // このスタイルはもはや必要ないかもしれない
+          // boxShadow: '0 0 5px 0px rgba(0, 123, 255, .4)',
+          boxShadow: '',
           fontSize: '16px',
           multiline: true
         },
@@ -180,7 +182,7 @@ export default {
     },
     editableStyle () {
       return {
-        right: '-10px'
+        right: `-${this.offsetRight}px`
       }
     },
     highlightMenuStyle () {
@@ -280,8 +282,7 @@ export default {
         // MEMO: 改行したとき、先頭に空の span いれると座標がずれるため zero-width-space 入れる
         anchor.innerHTML = '&#8203;'
         range.insertNode(anchor)
-        // TODO: 消すか判断する
-        // const parent = anchor.closest('[data-key=editor]')
+        const parent = anchor.closest('[data-key=editor]')
         const pos = anchor.getBoundingClientRect()
         anchor.parentElement.removeChild(anchor)
         const parentPos = this.$refs.preview.getBoundingClientRect()
@@ -292,8 +293,7 @@ export default {
         // MEMO: 相対パスでの座標指定であってもスクローラブルな状態だと left:0 にしても左端に行くわけじゃないので
         // はみでたエディタ右は自分を計算してマイナスで調整している
         const parentRight = parentPos.width - parentLeft - viewerPos.width
-        // const offset = parent.className === 'tategaki-editable' ? this.offsetRight : 0
-        const offset = 0
+        const offset = parent && parent.className === 'tategaki-editable' ? this.offsetRight : 0
         this.activeStyles.caret.top = `${pos.top - parentPos.top}px`
         this.activeStyles.caret.left = anchorLeft - parentLeft - parentRight - 4 - offset + 'px'
       }
@@ -373,7 +373,7 @@ export default {
       } else if (ua.mobile && ua.os === 'OS X') {
         // MEMO: appendChild などで DOM 構造を変更すると、Range オブジェクトの中身が勝手に変わってしまうので
         // 中身を抜き出してメモしておく。実際に使うときに createRange で再生性する
-        const range = document.caretRangeFromPoint(e.clientX, e.clientY).cloneRange()
+        const range = document.caretRangeFromPoint(e.clientX, e.clientY)
         this.memoRange.startContainer = range.startContainer
         this.memoRange.endContainer = range.endContainer
         this.memoRange.startOffset = range.startOffset
@@ -437,8 +437,17 @@ export default {
         //監視ターゲットの取得
         if (ua.mobile && ua.name === 'safari' && this.activeStyles.box.position !== 'fixed') {
           this.editing = true
+          // App.vue の example では問題なくキーボードが起動するが
+          // noco に組み込むとキーボードが起動しない…
           this.waitingPaintAndFocusForMobileSafari(e, range)
           this.fullScreenForMobile()
+          // ふつうにこちらでやればキーボードは起動するが caret 位置はぶっ飛ぶ…困る
+          // this.focusAndMoveCaret(e, range)
+
+          // MEMO: キーボードがせり上がってきたときに入力欄が上にスライドしてしまうので
+          setTimeout(() => {
+            window.scrollTo(0, 0)
+          }, 100)
         } else {
           this.focusAndMoveCaret(e, range)
         }
@@ -675,6 +684,8 @@ export default {
   top: 5px;
   left: 5px;
   z-index: 10000;
-  font-size: 24px;
+  font-size: 18px;
+  background: none;
+  border: none;
 }
 </style>
