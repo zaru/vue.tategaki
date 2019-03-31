@@ -5,17 +5,17 @@
       <p>aaaaaaaaaaaaaa</p>
     </div>
     <vue-tategaki
-      content="<p>abcedfg</p>"
+      content="<p>asdfadfadfadfa</p><p>lkjhlkjhlkjhljhl</p>"
       @updated="update"
       :styles="styles1"
       :placeholder="`place holder`"
     >
     </vue-tategaki>
     <vue-tategaki
-      content=""
+      content="<p>second</p>"
       @updated="update"
       :styles="styles2"
-      :placeholder="`place holder`"
+      :placeholder="`これがプレースホルダーというやつです`"
     >
     </vue-tategaki>
   </div>
@@ -43,8 +43,8 @@ export default Vue.extend({
       },
       styles2: {
         container: {
-          minWidth: '500px',
-          height: '500px',
+          minWidth: '200px',
+          height: '300px',
           multiline: true
           // outline: false
         }
@@ -53,11 +53,19 @@ export default Vue.extend({
   },
   methods: {
     update (e) {
-      console.log('Class: , Function: , Line 36 e: ', e)
+      console.log('Class: , Function: , Line 36 e: 1', e)
     }
   }
 })
 </script>
 
 <style scoped>
+  #app {
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+    width: 300px;
+    height: 600px;
+    border: 1px solid #000;
+  }
 </style>

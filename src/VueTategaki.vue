@@ -91,7 +91,7 @@ export default {
           left: '0',
           right: '0',
           bottom: '0',
-          outline: true,
+          outline: false,
           boxShadow: '0 0 5px 0px rgba(0, 123, 255, .4)',
           fontSize: '16px',
           multiline: true
@@ -109,12 +109,20 @@ export default {
         }
       },
       originalContainerHeight: '',
+      originalParentNode: null,
+      originalNextNode: null,
       iOSKeyboardHeight: '450px',
       innerContent: '',
       previewContent: '',
       compositing: false,
       selecting: false,
-      focusing: false
+      focusing: false,
+      memoRange: {
+        startContainer: null,
+        endContainer: null,
+        startOffset: 0,
+        endOffset: 0
+      }
     }
   },
   computed: {
@@ -273,7 +281,7 @@ export default {
         anchor.innerHTML = '&#8203;'
         range.insertNode(anchor)
         // TODO: 消すか判断する
-        const parent = anchor.closest('[data-key=editor]')
+        // const parent = anchor.closest('[data-key=editor]')
         const pos = anchor.getBoundingClientRect()
         anchor.parentElement.removeChild(anchor)
         const parentPos = this.$refs.preview.getBoundingClientRect()
@@ -329,7 +337,7 @@ export default {
       this.$refs.editable.focus()
       // TODO: キーボードがせり上がったときの高さ調整及びスクロールさせないための何かが必要
       if (ua.mobile && ua.name === 'safari') {
-        this.activeStyles.container.height = `160px`
+        this.activeStyles.container.height = `${document.documentElement.clientHeight - 310}px`
       }
     },
     focusEditor (activeRange) {
@@ -363,7 +371,14 @@ export default {
         range.setStart(e.rangeParent, e.rangeOffset)
         return range
       } else if (ua.mobile && ua.os === 'OS X') {
-        return document.caretRangeFromPoint(e.clientX, e.clientY)
+        // MEMO: appendChild などで DOM 構造を変更すると、Range オブジェクトの中身が勝手に変わってしまうので
+        // 中身を抜き出してメモしておく。実際に使うときに createRange で再生性する
+        const range = document.caretRangeFromPoint(e.clientX, e.clientY).cloneRange()
+        this.memoRange.startContainer = range.startContainer
+        this.memoRange.endContainer = range.endContainer
+        this.memoRange.startOffset = range.startOffset
+        this.memoRange.endOffset = range.endOffset
+        return range
       }
       return this.currentSelectionAndRange().range
     },
@@ -371,9 +386,11 @@ export default {
       // TODO: 横スクロールのみ許可して、縦スクロールは禁止したい
     },
     fullScreenForMobile () {
+      this.originalParentNode = this.$refs.box.parentNode
+      if (this.$refs.box.nextSibling) {
+        this.originalNextNode = this.$refs.box.nextSibling
+      }
       document.body.appendChild(this.$refs.box)
-      //
-      // this.activeStyles.container.height = `calc(100% - ${this.iOSKeyboardHeight})`
       this.activeStyles.container.height = '100%'
       this.activeStyles.box.height = '100%'
       this.activeStyles.box.position = 'fixed'
@@ -382,6 +399,11 @@ export default {
       document.addEventListener('touchmove', this.dontScroll, { passive: false })
     },
     restoreScreenForMobile () {
+      if (this.originalNextNode) {
+        this.originalParentNode.insertBefore(this.$refs.box, this.originalNextNode)
+      } else {
+        this.originalParentNode.appendChild(this.$refs.box)
+      }
       this.activeStyles.box.height = 'auto'
       this.activeStyles.container.height = this.originalContainerHeight
       this.activeStyles.box.position = 'static'
@@ -396,7 +418,10 @@ export default {
     waitingPaintAndFocusForMobileSafari (e, range) {
       const target = this.$refs.box
       const observer = new MutationObserver(() => {
-        this.focusAndMoveCaret(e, range)
+        const newRange = document.createRange()
+        newRange.setStart(this.memoRange.startContainer, this.memoRange.startOffset)
+        newRange.setEnd(this.memoRange.endContainer, this.memoRange.endOffset)
+        this.focusAndMoveCaret(e, newRange)
         observer.disconnect()
       })
       const options = {
@@ -588,7 +613,7 @@ export default {
   position: absolute;
   z-index: -1;
   top: 0px;
-  opacity: 0.5;
+  opacity: 0;
   color: #f00;
   background-color: #ddd;
 }
@@ -604,7 +629,7 @@ export default {
 .tategaki-editable, .tategaki-preview {
   user-select: text;
   -webkit-user-select: text;
-  /*caret-color: transparent;*/
+  caret-color: transparent;
 }
 
 .caret {
