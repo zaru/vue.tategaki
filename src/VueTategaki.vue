@@ -1,14 +1,9 @@
 <template>
-  <div class="tategaki"
-       ref="box"
-       :style="boxStyle"
-  >
-    <button v-show="editing" class="tategaki-input-done" @click="done">🔙️</button>
-    <div
-      class="tategaki-container"
-      ref="container"
-      :style="containerStyle"
-    >
+  <div class="tategaki" ref="box" :style="boxStyle">
+    <button v-show="editing" class="tategaki-input-done" @click="done">
+      🔙️
+    </button>
+    <div class="tategaki-container" ref="container" :style="containerStyle">
       <div
         contenteditable="true"
         class="tategaki-editable"
@@ -25,7 +20,8 @@
         @keydown.enter.exact="disableBreakLine"
         @paste.prevent="pasteText"
         @focus="focus"
-        @blur="focusOut"></div>
+        @blur="focusOut"
+      ></div>
 
       <div
         class="tategaki-preview"
@@ -35,13 +31,18 @@
         :contenteditable="previewEditable"
         v-html="contentHtml"
         ref="preview"
-        @click="selected"></div>
+        @click="selected"
+      ></div>
 
       <div class="caret" ref="caret" :style="caretStyle">
         <svg><rect x="0" y="0" width="100%" height="1"></rect></svg>
       </div>
     </div>
-    <div v-if="activeStyles.highlightMenu.enable" class="highlight-menu" :style="highlightMenuStyle">
+    <div
+      v-if="activeStyles.highlightMenu.enable"
+      class="highlight-menu"
+      :style="highlightMenuStyle"
+    >
       <button @click="toBold">B</button>
       <button @click="toHead">T</button>
     </div>
@@ -55,8 +56,7 @@ const ua = browser()
 
 export default {
   name: 'VueTategaki',
-  components: {
-  },
+  components: {},
   props: {
     content: {
       type: String
@@ -68,7 +68,7 @@ export default {
       type: String
     }
   },
-  data () {
+  data() {
     return {
       editing: false,
       activeStyles: {},
@@ -128,25 +128,25 @@ export default {
     }
   },
   computed: {
-    editContent () {
+    editContent() {
       return this.indexedHtml(this.innerContent)
     },
-    contentHtml () {
+    contentHtml() {
       return this.indexedHtml(this.previewContent)
     },
-    previewEditable () {
+    previewEditable() {
       return this.selecting
     },
-    styleContainerOutline () {
+    styleContainerOutline() {
       if (!this.activeStyles.container.outline) {
         return false
       }
       return this.selecting || this.focusing
     },
-    offsetRight () {
+    offsetRight() {
       return parseInt(this.activeStyles.container.fontSize) * 1.5
     },
-    caretStyle () {
+    caretStyle() {
       return {
         display: this.activeStyles.caret.display,
         width: `${parseInt(this.activeStyles.container.fontSize) * 1.4}px`,
@@ -155,7 +155,7 @@ export default {
         left: this.activeStyles.caret.left
       }
     },
-    boxStyle () {
+    boxStyle() {
       return {
         height: this.activeStyles.box.height,
         position: this.activeStyles.box.position,
@@ -167,7 +167,7 @@ export default {
         zIndex: this.activeStyles.box.zIndex
       }
     },
-    containerStyle () {
+    containerStyle() {
       return {
         fontSize: this.activeStyles.container.fontSize,
         minWidth: this.activeStyles.container.minWidth,
@@ -177,43 +177,45 @@ export default {
         left: this.activeStyles.container.left,
         right: this.activeStyles.container.right,
         bottom: this.activeStyles.container.bottom,
-        boxShadow: this.styleContainerOutline ? this.activeStyles.container.boxShadow : ''
+        boxShadow: this.styleContainerOutline
+          ? this.activeStyles.container.boxShadow
+          : ''
       }
     },
-    editableStyle () {
+    editableStyle() {
       return {
         right: `-${this.offsetRight}px`
       }
     },
-    highlightMenuStyle () {
+    highlightMenuStyle() {
       return {
         top: this.activeStyles.highlightMenu.top,
         left: this.activeStyles.highlightMenu.left,
         display: this.activeStyles.highlightMenu.display
       }
     },
-    placeholderStatus () {
+    placeholderStatus() {
       return this.contentHtml === '<p data-key="0">​</p>'
     }
   },
   methods: {
-    setBlur () {
+    setBlur() {
       this.focusing = false
     },
     setFocus() {
       this.focusing = true
     },
-    setSelection () {
+    setSelection() {
       this.selecting = true
     },
-    setDeselection () {
+    setDeselection() {
       this.selecting = false
     },
-    setBlurAndDeselection () {
+    setBlurAndDeselection() {
       this.focusing = false
       this.selecting = false
     },
-    indexedHtml (content) {
+    indexedHtml(content) {
       const div = document.createElement('div')
       div.innerHTML = content
       div.childNodes.forEach((node, index) => {
@@ -228,34 +230,39 @@ export default {
       })
       return div.innerHTML
     },
-    cleanHtml (nodes) {
-      return [...nodes].map(e => {
-        e.removeAttribute('data-key')
-        ;[...e.childNodes].map(e => {
-          if (e.nodeType === 1) {
-            e.removeAttribute('data-key')
-          }
+    cleanHtml(nodes) {
+      return [...nodes]
+        .map(e => {
+          e.removeAttribute('data-key')
+          ;[...e.childNodes].map(e => {
+            if (e.nodeType === 1) {
+              e.removeAttribute('data-key')
+            }
+          })
+          return e.outerHTML
         })
-        return e.outerHTML
-      }).join('').replace('&#8203;', '')
+        .join('')
+        .replace('&#8203;', '')
     },
-    currentSelectionAndRange () {
+    currentSelectionAndRange() {
       const sel = window.getSelection()
       return { sel: sel, range: sel.getRangeAt(0) }
     },
-    sync () {
+    sync() {
       const nodes = this.$refs.editable.childNodes
       const cleanHTML = this.cleanHtml(nodes)
       this.previewContent = cleanHTML
       this.$emit('updated', cleanHTML)
     },
-    editorKeyUp (e) {
+    editorKeyUp(e) {
       this.moveCaret(e.target, this.currentSelectionAndRange().range)
     },
-    focusAndMoveCaret (e, range) {
+    focusAndMoveCaret(e, range) {
       // テキスト以外のエディタ部分をクリックした場合は、フォーカスを末尾へ
       if (e.target.className === 'tategaki-preview') {
-        const p = this.$refs.editable.childNodes[this.$refs.editable.childNodes.length - 1]
+        const p = this.$refs.editable.childNodes[
+          this.$refs.editable.childNodes.length - 1
+        ]
         if (p.childNodes.length) {
           const t = p.childNodes[p.childNodes.length - 1]
           this.activeFocus(t, t.length)
@@ -272,7 +279,7 @@ export default {
         this.focusEditor(activeRange)
       }
     },
-    moveCaret (target, range) {
+    moveCaret(target, range) {
       // MEMO: safari で日本語変換中に node をいじると二重でテキストが入ってしまうため変換中は caret 移動させない
       if (ua.name === 'safari' && this.compositing) {
         this.activeStyles.caret.display = 'none'
@@ -288,17 +295,22 @@ export default {
         const parentPos = this.$refs.preview.getBoundingClientRect()
         const anchorLeft = pos.left - parentPos.left
         const viewerPos = this.$refs.container.getBoundingClientRect()
-        const parentOffsetLeft = parentPos.left + document.defaultView.pageXOffset
+        const parentOffsetLeft =
+          parentPos.left + document.defaultView.pageXOffset
         const parentLeft = viewerPos.left - parentOffsetLeft
         // MEMO: 相対パスでの座標指定であってもスクローラブルな状態だと left:0 にしても左端に行くわけじゃないので
         // はみでたエディタ右は自分を計算してマイナスで調整している
         const parentRight = parentPos.width - parentLeft - viewerPos.width
-        const offset = parent && parent.className === 'tategaki-editable' ? this.offsetRight : 0
+        const offset =
+          parent && parent.className === 'tategaki-editable'
+            ? this.offsetRight
+            : 0
         this.activeStyles.caret.top = `${pos.top - parentPos.top}px`
-        this.activeStyles.caret.left = anchorLeft - parentLeft - parentRight - 4 - offset + 'px'
+        this.activeStyles.caret.left =
+          anchorLeft - parentLeft - parentRight - 4 - offset + 'px'
       }
     },
-    getActiveRange (range, target) {
+    getActiveRange(range, target) {
       // MEMO: 自身の textnode が親から見て何番目のインデックスなのかを知る
       let targetNode = range.startContainer
       let i = 0
@@ -313,12 +325,14 @@ export default {
         startOffset: range.startOffset
       }
     },
-    mergeTextNode (e) {
+    mergeTextNode(e) {
       // span を差し込むことで textnode が分割されるのをもとに戻す
       let joinNode = ''
       ;[...e.childNodes].forEach(node => {
         if (node.nodeType !== 3) {
-          node.innerText = [...node.childNodes].map(node => node.nodeValue).join('')
+          node.innerText = [...node.childNodes]
+            .map(node => node.nodeValue)
+            .join('')
           joinNode += node.outerHTML
         } else {
           joinNode += node.nodeValue
@@ -326,7 +340,7 @@ export default {
       })
       e.innerHTML = joinNode
     },
-    activeFocus (node, offset) {
+    activeFocus(node, offset) {
       const editorRange = document.createRange()
       const editorSel = window.getSelection()
       editorRange.setStart(node, offset)
@@ -337,10 +351,11 @@ export default {
       this.$refs.editable.focus()
       // TODO: キーボードがせり上がったときの高さ調整及びスクロールさせないための何かが必要
       if (ua.mobile && ua.name === 'safari') {
-        this.activeStyles.container.height = `${document.documentElement.clientHeight - 310}px`
+        this.activeStyles.container.height = `${document.documentElement
+          .clientHeight - 310}px`
       }
     },
-    focusEditor (activeRange) {
+    focusEditor(activeRange) {
       // 指定された node と offset から editor node を探索して focus させる
       const key = activeRange.key
       let targetNode = [...this.$refs.editable.childNodes].find(node => {
@@ -348,24 +363,30 @@ export default {
       })
       // MEMO: ネストされた node がある場合の対応
       if (!targetNode) {
-        targetNode = [...this.$refs.editable.childNodes].map(node => [...node.childNodes]).flat().find(node => {
-          return node.dataset && node.dataset.key === key
-        })
+        targetNode = [...this.$refs.editable.childNodes]
+          .map(node => [...node.childNodes])
+          .flat()
+          .find(node => {
+            return node.dataset && node.dataset.key === key
+          })
       }
       if (!targetNode) {
         targetNode = this.$refs.editable.childNodes[0]
       }
-      this.activeFocus(targetNode.childNodes[activeRange.index], activeRange.startOffset)
+      this.activeFocus(
+        targetNode.childNodes[activeRange.index],
+        activeRange.startOffset
+      )
     },
-    focus () {
+    focus() {
       this.defaultStyles.container.outline = true
     },
-    focusOut () {
+    focusOut() {
       this.setBlur()
       this.defaultStyles.container.outline = false
       this.activeStyles.caret.display = 'none'
     },
-    selectedRange (e) {
+    selectedRange(e) {
       if (ua.name === 'firefox') {
         const range = document.createRange()
         range.setStart(e.rangeParent, e.rangeOffset)
@@ -382,10 +403,10 @@ export default {
       }
       return this.currentSelectionAndRange().range
     },
-    dontScroll () {
+    dontScroll() {
       // TODO: 横スクロールのみ許可して、縦スクロールは禁止したい
     },
-    fullScreenForMobile () {
+    fullScreenForMobile() {
       this.originalParentNode = this.$refs.box.parentNode
       if (this.$refs.box.nextSibling) {
         this.originalNextNode = this.$refs.box.nextSibling
@@ -396,11 +417,16 @@ export default {
       this.activeStyles.box.position = 'fixed'
       this.activeStyles.box.background = '#fff'
       this.activeStyles.container.position = 'fixed'
-      document.addEventListener('touchmove', this.dontScroll, { passive: false })
+      document.addEventListener('touchmove', this.dontScroll, {
+        passive: false
+      })
     },
-    restoreScreenForMobile () {
+    restoreScreenForMobile() {
       if (this.originalNextNode) {
-        this.originalParentNode.insertBefore(this.$refs.box, this.originalNextNode)
+        this.originalParentNode.insertBefore(
+          this.$refs.box,
+          this.originalNextNode
+        )
       } else {
         this.originalParentNode.appendChild(this.$refs.box)
       }
@@ -409,17 +435,22 @@ export default {
       this.activeStyles.box.position = 'static'
       this.activeStyles.box.background = 'none'
       this.activeStyles.container.position = 'relative'
-      document.removeEventListener('touchmove', this.dontScroll, { passive: false })
+      document.removeEventListener('touchmove', this.dontScroll, {
+        passive: false
+      })
     },
-    done () {
+    done() {
       this.restoreScreenForMobile()
       this.editing = false
     },
-    waitingPaintAndFocusForMobileSafari (e, range) {
+    waitingPaintAndFocusForMobileSafari(e) {
       const target = this.$refs.box
       const observer = new MutationObserver(() => {
         const newRange = document.createRange()
-        newRange.setStart(this.memoRange.startContainer, this.memoRange.startOffset)
+        newRange.setStart(
+          this.memoRange.startContainer,
+          this.memoRange.startOffset
+        )
         newRange.setEnd(this.memoRange.endContainer, this.memoRange.endOffset)
         this.focusAndMoveCaret(e, newRange)
         observer.disconnect()
@@ -430,12 +461,16 @@ export default {
       }
       observer.observe(target, options)
     },
-    selected (e) {
+    selected(e) {
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startOffset === range.endOffset) {
         //監視ターゲットの取得
-        if (ua.mobile && ua.name === 'safari' && this.activeStyles.box.position !== 'fixed') {
+        if (
+          ua.mobile &&
+          ua.name === 'safari' &&
+          this.activeStyles.box.position !== 'fixed'
+        ) {
           this.editing = true
           // App.vue の example では問題なくキーボードが起動するが
           // noco に組み込むとキーボードが起動しない…
@@ -470,8 +505,10 @@ export default {
         }
       }
     },
-    pasteText (e) {
-      const text = window.clipboardData ? window.clipboardData.getData('text') : e.clipboardData.getData('text/plain')
+    pasteText(e) {
+      const text = window.clipboardData
+        ? window.clipboardData.getData('text')
+        : e.clipboardData.getData('text/plain')
       const { sel, range } = this.currentSelectionAndRange()
       const node = document.createTextNode(text)
       range.insertNode(node)
@@ -481,13 +518,13 @@ export default {
       sel.addRange(range)
       this.sync()
     },
-    compositionstart () {
+    compositionstart() {
       this.compositing = true
     },
-    compositionend () {
+    compositionend() {
       this.compositing = false
     },
-    deleteSelectNode (e) {
+    deleteSelectNode(e) {
       if (this.selecting && (e.key === 'Backspace' || e.key === 'Delete')) {
         e.stopPropagation()
         e.preventDefault()
@@ -519,7 +556,7 @@ export default {
         this.setBlurAndDeselection()
       }
     },
-    selectAll (e) {
+    selectAll(e) {
       e.stopPropagation()
       e.preventDefault()
       this.selecting = true
@@ -527,15 +564,17 @@ export default {
       const range = document.createRange()
       const sel = window.getSelection()
       range.setStart(this.$refs.preview.childNodes[0], 0)
-      const endNode = this.$refs.preview.childNodes[this.$refs.preview.childNodes.length - 1]
+      const endNode = this.$refs.preview.childNodes[
+        this.$refs.preview.childNodes.length - 1
+      ]
       range.setEnd(endNode, endNode.childNodes.length)
       sel.removeAllRanges()
       sel.addRange(range)
     },
-    disableSwipeBack (e) {
+    disableSwipeBack(e) {
       // TODO: firefox / safari だとうまくうごいていない
       // エディタ以外のスクロールには関与しない
-      if (!e.path.find(dom => dom.className === 'content-editable-page') ){
+      if (!e.path.find(dom => dom.className === 'content-editable-page')) {
         return
       }
       const container = this.$refs.container.getBoundingClientRect()
@@ -544,14 +583,14 @@ export default {
         e.preventDefault()
       }
     },
-    toBold () {
+    toBold() {
       // MEMO: preview 自体を一時的に contenteditable にして execCommand が効くようにして再代入している
       document.execCommand('bold')
       this.$refs.editable.innerHTML = this.$refs.preview.innerHTML
       this.sync()
       this.setBlurAndDeselection()
     },
-    toHead () {
+    toHead() {
       // MEMO: preview 自体を一時的に contenteditable にして execCommand が効くようにして再代入している
       const sel = window.getSelection()
       if (sel.anchorNode.parentNode.localName === 'h3') {
@@ -563,7 +602,7 @@ export default {
       this.sync()
       this.setBlurAndDeselection()
     },
-    hideHighlightMenu () {
+    hideHighlightMenu() {
       const sel = window.getSelection()
       // MEMO: 解除はここでやる、メニュー出現は preview 自身を select したときのみなので
       if (sel.rangeCount === 0) {
@@ -573,7 +612,7 @@ export default {
         })
       }
     },
-    disableBreakLine (e) {
+    disableBreakLine(e) {
       if (!this.activeStyles.container.multiline) {
         e.preventDefault()
         return
@@ -630,12 +669,13 @@ export default {
   box-sizing: border-box;
   opacity: 1;
 }
-[data-placeholder][data-placeholderactive=true]:before {
+[data-placeholder][data-placeholderactive='true']:before {
   content: attr(data-placeholder);
   opacity: 0.5;
   position: absolute;
 }
-.tategaki-editable, .tategaki-preview {
+.tategaki-editable,
+.tategaki-preview {
   user-select: text;
   -webkit-user-select: text;
   caret-color: transparent;
@@ -657,8 +697,12 @@ export default {
   fill: #333;
 }
 @keyframes blinkAnimation {
-  0% { opacity: 0 }
-  100% { opacity: 1 }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .highlight-menu {
@@ -669,7 +713,7 @@ export default {
   border-radius: 3px;
   display: inline-block;
 }
-.highlight-menu button{
+.highlight-menu button {
   width: 32px;
   height: 32px;
   display: block;

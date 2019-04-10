@@ -1,7 +1,10 @@
 <template>
   <div id="app">
     <h1>Tategaki Editor example</h1>
-    <div contenteditable="true" style="height: 300px;font-size:32px;writing-mode: vertical-rl;">
+    <div
+      contenteditable="true"
+      style="height: 300px;font-size:32px;writing-mode: vertical-rl;"
+    >
       <p>aaaaaaaaaaaaaa</p>
     </div>
     <vue-tategaki
@@ -30,7 +33,7 @@ export default Vue.extend({
   components: {
     VueTategaki
   },
-  data () {
+  data() {
     return {
       styles1: {
         container: {
@@ -52,7 +55,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    update (e) {
+    update(e) {
       console.log('Class: , Function: , Line 36 e: 1', e)
     }
   }
@@ -60,12 +63,12 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-  #app {
-    position: relative;
-    z-index: 2;
-    overflow: hidden;
-    width: 300px;
-    height: 600px;
-    border: 1px solid #000;
-  }
+#app {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  width: 300px;
+  height: 600px;
+  border: 1px solid #000;
+}
 </style>
