@@ -14,7 +14,7 @@
         @compositionstart="compositionstart"
         @compositionend="compositionend"
         @input="sync"
-        @keyup.exact="editorKeyUp"
+        @keydown="editorKeyDown"
         @keydown.ctrl.65="selectAll"
         @keydown.meta.65="selectAll"
         @keydown.enter.exact="disableBreakLine"
@@ -254,8 +254,14 @@ export default {
       this.previewContent = cleanHTML
       this.$emit('updated', cleanHTML)
     },
-    editorKeyUp(e) {
-      this.moveCaret(e.target, this.currentSelectionAndRange().range)
+    editorKeyDown(e) {
+      // MEMO: ctrl + f などのカーソル移動時のコールバックを keydown では同期的には受け取れず
+      // setTimeout で処理すると受け取れる謎
+      setTimeout(() => {
+        const range = this.currentSelectionAndRange().range
+        console.log(range.startOffset, range.endOffset)
+        this.moveCaret(e.target, range)
+      }, 0)
     },
     focusAndMoveCaret(e, range) {
       // テキスト以外のエディタ部分をクリックした場合は、フォーカスを末尾へ
