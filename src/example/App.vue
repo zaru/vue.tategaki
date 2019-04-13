@@ -1,13 +1,8 @@
 <template>
   <div id="app">
     <h1>Tategaki Editor example</h1>
-    <div
-      contenteditable="true"
-      style="height: 300px;font-size:32px;writing-mode: vertical-rl;"
-    >
-      <p>aaaaaaaaaaaaaa</p>
-    </div>
     <vue-tategaki
+      key="1"
       content="<p>asdfadfadfadfa</p><p>lkjhlkjhlkjhljhl</p>"
       @updated="update"
       :styles="styles1"
@@ -15,7 +10,8 @@
     >
     </vue-tategaki>
     <vue-tategaki
-      content="<p>second</p>"
+      key="2"
+      content="<p>123</p>"
       @updated="update"
       :styles="styles2"
       :placeholder="`これがプレースホルダーというやつです`"
@@ -64,11 +60,5 @@ export default Vue.extend({
 
 <style scoped>
 #app {
-  position: relative;
-  z-index: 2;
-  overflow: hidden;
-  width: 300px;
-  height: 600px;
-  border: 1px solid #000;
 }
 </style>
