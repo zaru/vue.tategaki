@@ -4,8 +4,8 @@ class StackBuffer {
     this.max_size = 100
   }
 
-  set stack(val) {
-    this.buffer.push(val)
+  stack(content, range) {
+    this.buffer.push({content: content, range: range})
     if (this.buffer.length > this.max_size) {
       this.buffer.shift()
     }

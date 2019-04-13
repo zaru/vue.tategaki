@@ -59,7 +59,6 @@ import merge from 'lodash.merge'
 import browser from 'browser-detect'
 import StackBuffer from './lib/stack_buffer'
 const ua = browser()
-const stackBuffer = new StackBuffer()
 
 export default {
   name: 'VueTategaki',
@@ -77,6 +76,7 @@ export default {
   },
   data() {
     return {
+      stackBuffer: new StackBuffer(),
       editing: false,
       activeStyles: {},
       defaultStyles: {
@@ -124,6 +124,7 @@ export default {
       innerContent: '',
       previewContent: '',
       stackContent: '', // MEMO: 変更 diff を取るためのもの（日本語変換中の変更を反映させない）
+      stackRange: {},
       compositing: false,
       selecting: false,
       focusing: false,
@@ -260,10 +261,16 @@ export default {
       const nodes = this.$refs.editable.childNodes
       const cleanHTML = this.cleanHtml(nodes)
       this.previewContent = cleanHTML
-      console.log(this.$refs.editable.innerHTML)
       if (!this.compositing) {
-        stackBuffer.stack = this.stackContent
+        const memoRange = {}
+        memoRange.startContainer = this.stackRange.startContainer
+        memoRange.endContainer = this.stackRange.endContainer
+        memoRange.startOffset = this.stackRange.startOffset
+        memoRange.endOffset = this.stackRange.endOffset
+        this.stackBuffer.stack(this.stackContent, memoRange)
+        console.log(this.stackBuffer.all_buffer)
         this.stackContent = cleanHTML
+        this.stackRange = this.selectedRange()
       }
       this.$emit('updated', cleanHTML)
     },
@@ -639,11 +646,21 @@ export default {
       }
     },
     undo() {
-      // TODO: caret のいちを復元しないといけない
-      const buffer = stackBuffer.current
+      const buffer = this.stackBuffer.current
       if (buffer) {
-        this.$refs.editable.innerHTML = buffer
-        this.$refs.preview.innerHTML = buffer
+        this.$refs.editable.innerHTML = buffer.content
+        this.$refs.preview.innerHTML = buffer.content
+        // MEMO: ctrl-z して文字入力したときにスタックを復元させる
+        this.stackContent = buffer.content
+        this.stackRange = buffer.range
+        // MEMO: Range オブジェクト自体は参照なので具体的な値をメモ化して復元させる
+        const newRange = document.createRange()
+        newRange.setStart(
+          buffer.range.startContainer,
+          buffer.range.startOffset
+        )
+        newRange.setEnd(buffer.range.endContainer, buffer.range.endOffset)
+        this.focusAndMoveCaret({target: this.$refs.editable}, newRange)
       }
     }
   },
