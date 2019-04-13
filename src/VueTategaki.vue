@@ -21,6 +21,7 @@
         @keydown.ctrl.80="editorKeyDown"
         @keydown.ctrl.65="selectAll"
         @keydown.meta.65="selectAll"
+        @keydown.meta.90.prevent.stop="undo"
         @keydown.enter.exact="disableBreakLine"
         @paste.prevent="pasteText"
         @focus="focus"
@@ -56,7 +57,9 @@
 <script>
 import merge from 'lodash.merge'
 import browser from 'browser-detect'
+import StackBuffer from './lib/stack_buffer'
 const ua = browser()
+const stackBuffer = new StackBuffer()
 
 export default {
   name: 'VueTategaki',
@@ -120,6 +123,7 @@ export default {
       iOSKeyboardHeight: '450px',
       innerContent: '',
       previewContent: '',
+      stackContent: '', // MEMO: 変更 diff を取るためのもの（日本語変換中の変更を反映させない）
       compositing: false,
       selecting: false,
       focusing: false,
@@ -256,6 +260,11 @@ export default {
       const nodes = this.$refs.editable.childNodes
       const cleanHTML = this.cleanHtml(nodes)
       this.previewContent = cleanHTML
+      console.log(this.$refs.editable.innerHTML)
+      if (!this.compositing) {
+        stackBuffer.stack = this.stackContent
+        this.stackContent = cleanHTML
+      }
       this.$emit('updated', cleanHTML)
     },
     editorKeyDown(e) {
@@ -533,6 +542,7 @@ export default {
     },
     compositionend() {
       this.compositing = false
+      this.sync()
     },
     deleteSelectNode(e) {
       if (this.selecting && (e.key === 'Backspace' || e.key === 'Delete')) {
@@ -627,6 +637,14 @@ export default {
         e.preventDefault()
         return
       }
+    },
+    undo() {
+      // TODO: caret のいちを復元しないといけない
+      const buffer = stackBuffer.current
+      if (buffer) {
+        this.$refs.editable.innerHTML = buffer
+        this.$refs.preview.innerHTML = buffer
+      }
     }
   },
   created() {
@@ -637,9 +655,11 @@ export default {
     if (!this.content) {
       this.previewContent = '<p>&#8203;</p>'
       this.innerContent = '<p>&#8203;</p>'
+      this.stackContent = '<p>&#8203;</p>'
     } else {
       this.previewContent = this.content
       this.innerContent = this.content
+      this.stackContent = this.content
     }
     document.execCommand('DefaultParagraphSeparator', false, 'p')
     window.addEventListener('keydown', this.deleteSelectNode, true)
