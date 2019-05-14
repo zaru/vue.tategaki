@@ -269,7 +269,6 @@ export default {
         memoRange.startOffset = this.stackRange.startOffset
         memoRange.endOffset = this.stackRange.endOffset
         this.stackBuffer.stack(this.stackContent, memoRange)
-        console.log(this.stackBuffer.all_buffer)
         this.stackContent = cleanHTML
         this.stackRange = this.selectedRange()
       }
@@ -280,7 +279,6 @@ export default {
       // setTimeout で処理すると受け取れる謎
       setTimeout(() => {
         const range = this.currentSelectionAndRange().range
-        console.log(range.startOffset, range.endOffset)
         this.moveCaret(e.target, range)
       }, 0)
     },
