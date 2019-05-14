@@ -153,7 +153,8 @@ export default {
       return this.selecting || this.focusing
     },
     offsetRight() {
-      return parseInt(this.activeStyles.container.fontSize) * 1.5
+      const ratio = ua.os.includes('Windows') ? 2.5 : 1.5
+      return parseInt(this.activeStyles.container.fontSize) * ratio
     },
     caretStyle() {
       return {
