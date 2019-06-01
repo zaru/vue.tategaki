@@ -25,6 +25,10 @@ export default {
       type: HTMLDivElement,
       require: true
     },
+    editor: {
+      type: HTMLDivElement,
+      require: true
+    },
     viewer: {
       type: HTMLDivElement,
       require: true
@@ -59,6 +63,12 @@ export default {
   },
   methods: {
     moveCaret() {
+      // MEMO: 自身に関係ないイベントは無視している
+      const parentEditable = window.getSelection().getRangeAt(0).startContainer.parentElement.closest('.tategaki-editable')
+      if (parentEditable !== this.editor) {
+        return
+      }
+
       // MEMO: safari で日本語変換中に node をいじると二重でテキストが入ってしまうため変換中は caret 移動させない
       if (ua.name === 'safari' && this.compositing) {
         this.style.display = 'none'

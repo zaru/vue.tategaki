@@ -40,9 +40,10 @@
 
       <caret
         ref="caret"
-        v-if="$refs.preview && $refs.container"
+        v-if="$refs.preview && $refs.editable && $refs.container"
         :font-size="activeStyles.container.fontSize"
         :parent="$refs.preview"
+        :editor="$refs.editable"
         :viewer="$refs.container"
         :visible="showCaret"
       ></caret>
@@ -55,6 +56,7 @@ import merge from 'lodash.merge'
 import browser from 'browser-detect'
 import Caret from './components/Caret.vue'
 import StackBuffer from './lib/stack_buffer'
+import { paste } from './lib/copy_paste'
 const ua = browser()
 
 export default {
@@ -502,16 +504,7 @@ export default {
       }
     },
     pasteText(e) {
-      const text = window.clipboardData
-        ? window.clipboardData.getData('text')
-        : e.clipboardData.getData('text/plain')
-      const { sel, range } = this.currentSelectionAndRange()
-      const node = document.createTextNode(text)
-      range.insertNode(node)
-      range.setStartAfter(node)
-      range.setEndAfter(node)
-      sel.removeAllRanges()
-      sel.addRange(range)
+      paste(e)
       this.sync()
     },
     compositionstart() {

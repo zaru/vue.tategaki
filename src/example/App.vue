@@ -14,7 +14,7 @@
     <vue-tategaki
       class="container"
       key="2"
-      content="<p>最初のパラグラフ</p>"
+      content="<p>最初パラグラフ</p>"
       @updated="update"
       :styles="styles1"
       :placeholder="`place holder`"
