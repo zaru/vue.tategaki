@@ -255,9 +255,9 @@ export default {
         let newX = caretRect.x
         let newY = caretRect.y
         if (e.keyCode === 37) {
-          newX -= 50
+          newX -= parseInt(this.activeStyles.container.fontSize)
         } else if (e.keyCode === 39) {
-          newX += 90
+          newX += parseInt(this.activeStyles.container.fontSize) * 2
         }
         let range, elem
         if (document.caretRangeFromPoint) {
