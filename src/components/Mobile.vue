@@ -10,8 +10,6 @@
         :style="editableStyle"
         :data-placeholder="placeholder"
         :data-placeholderactive="placeholderStatus"
-        @compositionstart="compositionstart"
-        @compositionend="compositionend"
         @input="sync"
       ></div>
     </div>
@@ -170,7 +168,7 @@ export default {
   overflow-y: scroll;
   overflow-x: scroll;
 }
-.tategaki-container p {
+.tategaki-container >>> p {
   margin: 0;
   padding: 0;
 }
