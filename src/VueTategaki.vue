@@ -658,7 +658,6 @@ export default {
 [data-placeholder][data-placeholderactive='true']:before {
   content: attr(data-placeholder);
   opacity: 0.5;
-  position: absolute;
 }
 .tategaki-editable,
 .tategaki-preview {
