@@ -6,6 +6,7 @@
   "module": "dist/vuetategaki.common.js",
   "scripts": {
     "serve": "vue-cli-service serve ./src/example/main.js",
+    "build-demo": "vue-cli-service build ./src/example/main.js",
     "build": "vue-cli-service build --name vuetategaki --entry ./src/vue.tategaki.js --target lib",
     "watch": "vue-cli-service build --watch --name vuetategaki --entry ./src/vue.tategaki.js --target lib",
     "lint": "vue-cli-service lint",
