@@ -398,9 +398,11 @@ export default {
       this.sync()
     },
     deleteSelectNode(e) {
-      if (this.selecting && (e.key === 'Backspace' || e.key === 'Delete')) {
-        e.stopPropagation()
-        e.preventDefault()
+      if (this.selecting) {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+          e.stopPropagation()
+          e.preventDefault()
+        }
 
         // MEMO: 選択削除後、キャレットの位置を復元
         const { sel, range } = this.currentSelectionAndRange()
