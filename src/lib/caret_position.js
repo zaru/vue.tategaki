@@ -11,7 +11,8 @@ const getPositionAtLast = (clone) => {
 
 const getPosition = (clone, range, fixedPosition) => {
   if (range.endContainer.nodeName === 'BR') {
-    clone.setStart(range.endContainer, fixedPosition)
+    clone.detach()
+    return range.endContainer.parentElement.getBoundingClientRect()
   } else {
     clone.setStart(range.endContainer, fixedPosition)
     clone.setEnd(range.endContainer, fixedPosition + 1)
