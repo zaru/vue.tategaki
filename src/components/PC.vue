@@ -48,6 +48,7 @@
       <selection
         v-if="$refs.preview"
         :parent="$refs.preview"
+        :content="contentHtml"
       ></selection>
     </div>
   </div>

@@ -14,6 +14,10 @@ export default {
     parent: {
       type: HTMLDivElement,
       require: true
+    },
+    content: {
+      type: String,
+      require: true
     }
   },
   data() {
@@ -38,6 +42,11 @@ export default {
       },
       memoSelectedWidth: 0,
       memoSelectedStartOffset: 0
+    }
+  },
+  watch: {
+    content() {
+      this.resetAll()
     }
   },
   computed: {
@@ -141,9 +150,11 @@ export default {
   },
   mounted() {
     document.addEventListener('selectionchange', this.selection)
+    document.querySelector('.tategaki-editable').addEventListener('blur', this.resetAll)
   },
   destroyed() {
     document.removeEventListener('selectionchange', this.selection)
+    document.querySelector('.tategaki-editable').removeEventListener('blur', this.resetAll)
   }
 }
 </script>
