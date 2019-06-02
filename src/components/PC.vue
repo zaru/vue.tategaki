@@ -384,6 +384,25 @@ export default {
         this.setDeselection()
       } else {
         this.setSelection()
+
+        // TODO: あとで別のモジュールに切り出す
+        // 文字列を選択した場合は preview ではなく editable に Range をあてて編集権限を移乗する
+        // そうすることでコピペ・カットなど本来のエディタ入力補助がフルに使える。
+        // ただし、選択後直接文字入力した際には変換候補が文字にかぶるが許容する
+        const sel = window.getSelection()
+        const range = sel.getRangeAt(0)
+        const startKey = range.startContainer.parentElement.dataset.key
+        const startOffset = range.startOffset
+        const endKey = range.endContainer.parentElement.dataset.key
+        const endOffset = range.endOffset
+
+        const start = [...this.$refs.editable.childNodes].find(node => node.dataset.key === startKey).childNodes[0]
+        const end = [...this.$refs.editable.childNodes].find(node => node.dataset.key === endKey).childNodes[0]
+        const newRange = document.createRange()
+        newRange.setStart(start, startOffset)
+        newRange.setEnd(end, endOffset)
+        sel.removeAllRanges()
+        sel.addRange(newRange)
       }
     },
     pasteText(e) {
@@ -501,11 +520,11 @@ export default {
       this.stackContent = this.content
     }
     document.execCommand('DefaultParagraphSeparator', false, 'p')
-    window.addEventListener('keydown', this.deleteSelectNode, true)
+    // window.addEventListener('keydown', this.deleteSelectNode, true)
     window.addEventListener('mousewheel', this.disableSwipeBack)
   },
   destroyed() {
-    window.removeEventListener('keydown', this.deleteSelectNode, true)
+    // window.removeEventListener('keydown', this.deleteSelectNode, true)
     window.removeEventListener('mousewheel', this.disableSwipeBack)
   }
 }
