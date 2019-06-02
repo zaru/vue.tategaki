@@ -26,7 +26,7 @@ export default Vue.extend({
       styles1: {
         container: {
           minWidth: '100%',
-          height: '500px',
+          height: '200px',
           fontSize: '16px',
         }
       }
@@ -43,7 +43,12 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-  #app {
-    width: 100%;
-  }
+#app {
+  width: 100%;
+  padding: 100px;
+  box-sizing: border-box;
+}
+#app >>> p {
+  padding: 0 5px;
+}
 </style>

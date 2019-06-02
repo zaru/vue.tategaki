@@ -372,6 +372,10 @@ export default {
         const endKey = range.endContainer.parentElement.dataset.key
         const endOffset = range.endOffset
 
+        // TODO: この時点で editable の node に data-key がかならずあるわけじゃない
+        console.log(startKey)
+        console.log(this.$refs.editable)
+        console.log([...this.$refs.editable.childNodes])
         const start = [...this.$refs.editable.childNodes].find(node => node.dataset.key === startKey).childNodes[0]
         const end = [...this.$refs.editable.childNodes].find(node => node.dataset.key === endKey).childNodes[0]
         const newRange = document.createRange()

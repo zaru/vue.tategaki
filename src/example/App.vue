@@ -14,7 +14,7 @@
     <vue-tategaki
       class="container"
       key="2"
-      content="<p>最初パラグラフ</p>"
+      content="<p>あいうえお</p><p><br></p><p>かきくけこ</p>"
       @updated="update"
       :styles="styles1"
       :placeholder="`place holder`"
