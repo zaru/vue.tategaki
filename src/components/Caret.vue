@@ -64,7 +64,11 @@ export default {
   methods: {
     moveCaret() {
       // MEMO: 自身に関係ないイベントは無視している
-      const parentEditable = window.getSelection().getRangeAt(0).startContainer.parentElement.closest('.tategaki-editable')
+      const sel = window.getSelection()
+      if (sel.rangeCount === 0) {
+        return
+      }
+      const parentEditable = sel.getRangeAt(0).startContainer.parentElement.closest('.tategaki-editable')
       if (parentEditable !== this.editor) {
         return
       }

@@ -95,13 +95,16 @@ export default {
     },
     selection() {
       // MEMO: 自身に関係ないイベントは無視している
-      const parentPreview = window.getSelection().getRangeAt(0).startContainer.parentElement.closest('.tategaki-preview')
+      const sel = window.getSelection()
+      if (sel.rangeCount === 0) {
+        return
+      }
+      const range = sel.getRangeAt(0)
+      const parentPreview = range.startContainer.parentElement.closest('.tategaki-preview')
       if (parentPreview !== this.parent) {
         return
       }
 
-      const sel = window.getSelection()
-      const range = sel.getRangeAt(0)
       const rect = range.getBoundingClientRect()
       const parentRect = this.$refs.selection.parentElement.closest('.tategaki-container').getBoundingClientRect()
 
