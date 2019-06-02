@@ -15,8 +15,6 @@
         @keydown.40.exact.prevent.stop="arrowKeyMove"
         @keydown.39.exact.prevent.stop="arrowKeyMove"
         @keydown.37.exact.prevent.stop="arrowKeyMove"
-        @keydown.ctrl.65="selectAll"
-        @keydown.meta.65="selectAll"
         @keydown.meta.90.prevent.stop="undo"
         @keydown.enter.exact="disableBreakLine"
         @paste.prevent="pasteText"
@@ -29,7 +27,6 @@
         data-key="editor"
         :data-placeholder="placeholder"
         :data-placeholderactive="placeholderStatus"
-        :contenteditable="previewEditable"
         v-html="contentHtml"
         ref="preview"
         @click="selected"
@@ -123,7 +120,6 @@ export default {
       stackContent: '', // MEMO: 変更 diff を取るためのもの（日本語変換中の変更を反映させない）
       stackRange: {},
       compositing: false,
-      selecting: false,
       memoRange: {
         startContainer: null,
         endContainer: null,
@@ -139,9 +135,6 @@ export default {
     },
     contentHtml() {
       return this.indexedHtml(this.previewContent)
-    },
-    previewEditable() {
-      return this.selecting
     },
     offsetRight() {
       const ratio = ua.os.includes('Windows') ? 2.5 : 1.5
@@ -190,12 +183,6 @@ export default {
     }
   },
   methods: {
-    setSelection() {
-      this.selecting = true
-    },
-    setDeselection() {
-      this.selecting = false
-    },
     indexedHtml(content) {
       const div = document.createElement('div')
       div.innerHTML = content
@@ -317,21 +304,6 @@ export default {
         startOffset: range.startOffset
       }
     },
-    mergeTextNode(e) {
-      // span を差し込むことで textnode が分割されるのをもとに戻す
-      let joinNode = ''
-      ;[...e.childNodes].forEach(node => {
-        if (node.nodeType !== 3) {
-          node.innerText = [...node.childNodes]
-            .map(node => node.nodeValue)
-            .join('')
-          joinNode += node.outerHTML
-        } else {
-          joinNode += node.nodeValue
-        }
-      })
-      e.innerHTML = joinNode
-    },
     activeFocus(node, offset) {
       const editorRange = document.createRange()
       const editorSel = window.getSelection()
@@ -388,10 +360,7 @@ export default {
       if (range.startOffset === range.endOffset) {
         this.showCaret = true
         this.focusAndMoveCaret(e, range, false)
-        this.setDeselection()
       } else {
-        this.setSelection()
-
         // TODO: あとで別のモジュールに切り出す
         // 文字列を選択した場合は preview ではなく editable に Range をあてて編集権限を移乗する
         // そうすることでコピペ・カットなど本来のエディタ入力補助がフルに使える。
@@ -422,58 +391,6 @@ export default {
     compositionend() {
       this.compositing = false
       this.sync()
-    },
-    deleteSelectNode(e) {
-      if (this.selecting) {
-        if (e.key === 'Backspace' || e.key === 'Delete') {
-          e.stopPropagation()
-          e.preventDefault()
-        }
-
-        // MEMO: 選択削除後、キャレットの位置を復元
-        const { sel, range } = this.currentSelectionAndRange()
-
-        const acrossNode = range.startContainer !== range.endContainer
-        const target = range.startContainer.parentNode
-        sel.deleteFromDocument()
-
-        const activeRange = this.getActiveRange(range, target)
-        // MEMO: node またぎのときには先頭 node の末尾にキャレットを移動させる
-        if (acrossNode) {
-          activeRange.startOffset = target.innerText.length
-        }
-        this.mergeTextNode(target)
-
-        // MEMO: 全て消した場合、なにもないと入力できないので zero-width-space を入れる
-        if (!this.$refs.preview.innerText) {
-          this.$refs.preview.innerHTML = '<p>&#8203;</p>'
-        }
-        this.$refs.editable.innerHTML = this.$refs.preview.innerHTML
-        this.focusEditor(activeRange)
-        this.sync()
-        this.setDeselection()
-      } else if (e.key === 'Backspace' || e.key === 'Delete') {
-        // MEMO: 本当は Caret component のメソッドを直接呼びたくなかったが
-        // delete イベントを拾うことができないので親から呼び出すようにしている
-        setTimeout(() => {
-          this.$refs.caret.moveCaret()
-        }, 0)
-      }
-    },
-    selectAll(e) {
-      e.stopPropagation()
-      e.preventDefault()
-      this.setSelection()
-      document.activeElement.blur()
-      const range = document.createRange()
-      const sel = window.getSelection()
-      range.setStart(this.$refs.preview.childNodes[0], 0)
-      const endNode = this.$refs.preview.childNodes[
-        this.$refs.preview.childNodes.length - 1
-      ]
-      range.setEnd(endNode, endNode.childNodes.length)
-      sel.removeAllRanges()
-      sel.addRange(range)
     },
     disableSwipeBack(e) {
       // TODO: firefox / safari だとうまくうごいていない
@@ -527,11 +444,9 @@ export default {
       this.stackContent = this.content
     }
     document.execCommand('DefaultParagraphSeparator', false, 'p')
-    // window.addEventListener('keydown', this.deleteSelectNode, true)
     window.addEventListener('mousewheel', this.disableSwipeBack)
   },
   destroyed() {
-    // window.removeEventListener('keydown', this.deleteSelectNode, true)
     window.removeEventListener('mousewheel', this.disableSwipeBack)
   }
 }
