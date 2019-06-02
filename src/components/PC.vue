@@ -44,6 +44,11 @@
         :viewer="$refs.container"
         :visible="showCaret"
       ></caret>
+
+      <selection
+        v-if="$refs.preview"
+        :parent="$refs.preview"
+      ></selection>
     </div>
   </div>
 </template>
@@ -52,13 +57,14 @@
 import merge from 'lodash.merge'
 import browser from 'browser-detect'
 import Caret from './Caret.vue'
+import Selection from './Selection.vue'
 import StackBuffer from '../lib/stack_buffer'
 import { paste } from '../lib/copy_paste'
 const ua = browser()
 
 export default {
   name: 'PC',
-  components: { Caret },
+  components: { Caret, Selection },
   props: {
     content: {
       type: String
@@ -541,6 +547,9 @@ export default {
 .tategaki-container >>> p {
   margin: 0;
   padding: 0;
+}
+.tategaki-container >>> p::selection {
+  background: transparent;
 }
 .tategaki-editable {
   box-sizing: border-box;
