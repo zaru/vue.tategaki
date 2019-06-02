@@ -577,6 +577,7 @@ export default {
 .tategaki-preview {
   user-select: text;
   -webkit-user-select: text;
-  caret-color: transparent;
+  /* なぜか透明にすると Chrome で文字列削除時に span が勝手に挿入される… */
+  /*caret-color: transparent;*/
 }
 </style>
