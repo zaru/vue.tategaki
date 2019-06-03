@@ -113,6 +113,15 @@ export default {
         .getBoundingClientRect()
 
       if (this.first.width === 0) {
+        // 選択時に真横に移動しとき、初回 Range 取得で2行分になってしまうため
+        // 1文字分の幅を取得するためにダミーを挿入
+        const clone = range.cloneRange()
+        const shadowCaret = document.createTextNode('　')
+        clone.insertNode(shadowCaret)
+        clone.selectNode(shadowCaret)
+        const rect = clone.getBoundingClientRect()
+        shadowCaret.parentNode.removeChild(shadowCaret)
+        clone.detach()
         this.first.width = rect.width
       }
 
