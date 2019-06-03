@@ -240,7 +240,11 @@ export default {
         const startOffset = e.keyCode === 38 ? -1 : 1
         if (range.commonAncestorContainer.nodeValue === null) {
           // TODO: Node またぎの移動をサポートする
-        } else if (range.commonAncestorContainer.nodeValue.length >= range.startOffset + startOffset && 0 <= range.startOffset + startOffset) {
+        } else if (
+          range.commonAncestorContainer.nodeValue.length >=
+            range.startOffset + startOffset &&
+          0 <= range.startOffset + startOffset
+        ) {
           range.setStart(sel.anchorNode, range.startOffset + startOffset)
           range.setEnd(sel.anchorNode, range.startOffset)
         }
@@ -294,7 +298,10 @@ export default {
       let targetNode = range.startContainer
       let i = 0
       if (range.startContainer.nodeType === 3) {
-        while ((targetNode = targetNode.previousSibling) !== null && targetNode.textContent !== '') {
+        while (
+          (targetNode = targetNode.previousSibling) !== null &&
+          targetNode.textContent !== ''
+        ) {
           i++
         }
       }
@@ -376,8 +383,12 @@ export default {
         console.log(startKey)
         console.log(this.$refs.editable)
         console.log([...this.$refs.editable.childNodes])
-        const start = [...this.$refs.editable.childNodes].find(node => node.dataset.key === startKey).childNodes[0]
-        const end = [...this.$refs.editable.childNodes].find(node => node.dataset.key === endKey).childNodes[0]
+        const start = [...this.$refs.editable.childNodes].find(
+          node => node.dataset.key === startKey
+        ).childNodes[0]
+        const end = [...this.$refs.editable.childNodes].find(
+          node => node.dataset.key === endKey
+        ).childNodes[0]
         const newRange = document.createRange()
         newRange.setStart(start, startOffset)
         newRange.setEnd(end, endOffset)
@@ -424,12 +435,9 @@ export default {
         this.stackRange = buffer.range
         // MEMO: Range オブジェクト自体は参照なので具体的な値をメモ化して復元させる
         const newRange = document.createRange()
-        newRange.setStart(
-          buffer.range.startContainer,
-          buffer.range.startOffset
-        )
+        newRange.setStart(buffer.range.startContainer, buffer.range.startOffset)
         newRange.setEnd(buffer.range.endContainer, buffer.range.endOffset)
-        this.focusAndMoveCaret({target: this.$refs.editable}, newRange)
+        this.focusAndMoveCaret({ target: this.$refs.editable }, newRange)
       }
     }
   },

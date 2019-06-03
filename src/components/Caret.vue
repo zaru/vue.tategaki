@@ -68,7 +68,9 @@ export default {
       if (sel.rangeCount === 0) {
         return
       }
-      const parentEditable = sel.getRangeAt(0).startContainer.parentElement.closest('.tategaki-editable')
+      const parentEditable = sel
+        .getRangeAt(0)
+        .startContainer.parentElement.closest('.tategaki-editable')
       if (parentEditable !== this.editor) {
         return
       }

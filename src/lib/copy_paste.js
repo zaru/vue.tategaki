@@ -1,4 +1,4 @@
-const getRangeAndOffsetInTheText = (range) => {
+const getRangeAndOffsetInTheText = range => {
   let container
   for (let i = range.endContainer.childNodes.length - 2; i >= 0; i--) {
     if (range.endContainer.childNodes[i].nodeType !== 3) {
@@ -12,18 +12,18 @@ const getRangeAndOffsetInTheText = (range) => {
   }
 }
 
-const getRangeAndOffsetAtBottom = (range) => {
+const getRangeAndOffsetAtBottom = range => {
   return {
     node: range.endContainer,
     offset: 0
   }
 }
 
-const hasBreakLine = (text) => {
+const hasBreakLine = text => {
   return text.includes('\n')
 }
 
-const getNode = (text) => {
+const getNode = text => {
   if (hasBreakLine(text)) {
     const cleanHTMLs = text.split('\n').map(line => {
       return line ? `<p>${line}</p>` : `<p><br></p>`
@@ -36,7 +36,7 @@ const getNode = (text) => {
 }
 
 // ペーストしたテキストの中から段組みに必要な情報以外は消して追加する
-export const paste = (e) => {
+export const paste = e => {
   const text = window.clipboardData
     ? window.clipboardData.getData('text')
     : e.clipboardData.getData('text/plain')
@@ -58,7 +58,10 @@ export const paste = (e) => {
 
     const newRange = document.createRange()
     // 文中でペーストしたときに caret の位置をペーストの最後の node にする
-    if (range.commonAncestorContainer.childNodes.length !== text.split('\n').length + 1) {
+    if (
+      range.commonAncestorContainer.childNodes.length !==
+      text.split('\n').length + 1
+    ) {
       const { node, offset } = getRangeAndOffsetInTheText(range)
       newRange.setStart(node, offset)
     } else {
@@ -74,5 +77,4 @@ export const paste = (e) => {
     sel.removeAllRanges()
     sel.addRange(range)
   }
-
 }

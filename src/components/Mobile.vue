@@ -96,8 +96,7 @@ export default {
       }
     },
     editableStyle() {
-      return {
-      }
+      return {}
     },
     placeholderStatus() {
       return this.contentHtml === '<p data-key="0">​</p>'

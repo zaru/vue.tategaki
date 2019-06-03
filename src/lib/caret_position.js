@@ -1,5 +1,5 @@
 // caret の座標を取得して返す
-const getPositionAtLast = (clone) => {
+const getPositionAtLast = clone => {
   const shadowCaret = document.createTextNode('&nbsp;')
   clone.insertNode(shadowCaret)
   clone.selectNode(shadowCaret)
@@ -27,7 +27,9 @@ const currentRange = () => {
 }
 
 const canAdjust = () => {
-  const target = currentRange().startContainer.parentElement.closest('[data-key=editor]')
+  const target = currentRange().startContainer.parentElement.closest(
+    '[data-key=editor]'
+  )
   return target && target.className === 'tategaki-editable'
 }
 

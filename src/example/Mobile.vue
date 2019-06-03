@@ -27,7 +27,7 @@ export default Vue.extend({
         container: {
           minWidth: '100%',
           height: '200px',
-          fontSize: '16px',
+          fontSize: '16px'
         }
       }
     }
@@ -37,8 +37,7 @@ export default Vue.extend({
       console.log(e)
     }
   },
-  mounted() {
-  }
+  mounted() {}
 })
 </script>
 

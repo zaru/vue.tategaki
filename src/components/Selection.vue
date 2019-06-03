@@ -100,13 +100,17 @@ export default {
         return
       }
       const range = sel.getRangeAt(0)
-      const parentPreview = range.startContainer.parentElement.closest('.tategaki-preview')
+      const parentPreview = range.startContainer.parentElement.closest(
+        '.tategaki-preview'
+      )
       if (parentPreview !== this.parent) {
         return
       }
 
       const rect = range.getBoundingClientRect()
-      const parentRect = this.$refs.selection.parentElement.closest('.tategaki-container').getBoundingClientRect()
+      const parentRect = this.$refs.selection.parentElement
+        .closest('.tategaki-container')
+        .getBoundingClientRect()
 
       if (this.first.width === 0) {
         this.first.width = rect.width
@@ -124,7 +128,8 @@ export default {
         textRange.setStart(range.endContainer, range.endOffset - 1)
         textRange.setEnd(range.endContainer, range.endOffset)
         const textRect = textRange.getBoundingClientRect()
-        this.first.height = textRect.top - parentRect.top - this.first.top + textRect.height
+        this.first.height =
+          textRect.top - parentRect.top - this.first.top + textRect.height
       }
 
       if (this.first.width < rect.width) {
@@ -153,11 +158,15 @@ export default {
   },
   mounted() {
     document.addEventListener('selectionchange', this.selection)
-    document.querySelector('.tategaki-editable').addEventListener('blur', this.resetAll)
+    document
+      .querySelector('.tategaki-editable')
+      .addEventListener('blur', this.resetAll)
   },
   destroyed() {
     document.removeEventListener('selectionchange', this.selection)
-    document.querySelector('.tategaki-editable').removeEventListener('blur', this.resetAll)
+    document
+      .querySelector('.tategaki-editable')
+      .removeEventListener('blur', this.resetAll)
   }
 }
 </script>

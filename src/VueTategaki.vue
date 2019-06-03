@@ -1,5 +1,11 @@
 <template>
-  <component :is="editorComponent" :content="content" :styles="styles" :placeholder="placeholder" @updated="update"></component>
+  <component
+    :is="editorComponent"
+    :content="content"
+    :styles="styles"
+    :placeholder="placeholder"
+    @updated="update"
+  ></component>
 </template>
 
 <script>
@@ -23,8 +29,7 @@ export default {
     }
   },
   data() {
-    return {
-    }
+    return {}
   },
   computed: {
     editorComponent() {
@@ -36,12 +41,9 @@ export default {
       this.$emit('updated', method)
     }
   },
-  created() {
-  },
-  mounted() {
-  }
+  created() {},
+  mounted() {}
 }
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

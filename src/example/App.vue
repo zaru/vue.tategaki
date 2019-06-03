@@ -10,7 +10,7 @@
       :placeholder="`place holder`"
     >
     </vue-tategaki>
-    <hr>
+    <hr />
     <vue-tategaki
       class="container"
       key="2"
@@ -54,7 +54,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    update(e) {
+    update() {
       // console.log('Class: , Function: , Line 36 e: 1', e)
     }
   },
@@ -65,7 +65,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-  #app {
-    width: 100%;
-  }
+#app {
+  width: 100%;
+}
 </style>
