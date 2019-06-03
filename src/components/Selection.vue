@@ -113,7 +113,10 @@ export default {
         .getBoundingClientRect()
 
       if (this.first.width === 0) {
-        // MEMO: clone といえどただの参照なので insertNode するともとの Node に影響してしまう
+        // MEMO: cloneNode は値をコピーして互いに影響を与えないはずなんだけど
+        // 対象の TextNode が分割されたりで影響しているような気がする…
+        // insertNode が対象の TextNode にたいして行っているから…か。うーん
+        //
         // 選択時に真横に移動しとき、初回 Range 取得で2行分になってしまうため
         // 1文字分の幅を取得するためにダミーを挿入
         const clone = range.cloneRange()
@@ -128,7 +131,6 @@ export default {
 
       const textRange = document.createRange()
       if (range.startOffset + 1 <= range.startContainer.textContent.length) {
-
         textRange.setStart(range.startContainer, range.startOffset)
         textRange.setEnd(range.startContainer, range.startOffset + 1)
         const textRect = textRange.getBoundingClientRect()
