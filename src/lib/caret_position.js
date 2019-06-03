@@ -1,6 +1,7 @@
 // caret の座標を取得して返す
 const getPositionAtLast = clone => {
-  const shadowCaret = document.createTextNode('&nbsp;')
+  // なぜかここで全角を入れないと caret 座標が途中から正常な値にならなくなる…
+  const shadowCaret = document.createTextNode('　')
   clone.insertNode(shadowCaret)
   clone.selectNode(shadowCaret)
   const rect = clone.getBoundingClientRect()
