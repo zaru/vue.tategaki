@@ -113,6 +113,7 @@ export default {
         .getBoundingClientRect()
 
       if (this.first.width === 0) {
+        // MEMO: clone といえどただの参照なので insertNode するともとの Node に影響してしまう
         // 選択時に真横に移動しとき、初回 Range 取得で2行分になってしまうため
         // 1文字分の幅を取得するためにダミーを挿入
         const clone = range.cloneRange()
@@ -127,13 +128,14 @@ export default {
 
       const textRange = document.createRange()
       if (range.startOffset + 1 <= range.startContainer.textContent.length) {
+
         textRange.setStart(range.startContainer, range.startOffset)
         textRange.setEnd(range.startContainer, range.startOffset + 1)
         const textRect = textRange.getBoundingClientRect()
         this.first.top = textRect.top - parentRect.top
         this.first.left = textRect.left - parentRect.left
       }
-      if (range.endOffset > 0) {
+      if (range.endOffset > 0 && this.first.top > 0) {
         textRange.setStart(range.endContainer, range.endOffset - 1)
         textRange.setEnd(range.endContainer, range.endOffset)
         const textRect = textRange.getBoundingClientRect()
