@@ -106,6 +106,9 @@ export default {
       if (parentPreview !== this.parent) {
         return
       }
+      if (range.startContainer === range.endContainer && range.startOffset === range.endOffset) {
+        return
+      }
 
       const rect = range.getBoundingClientRect()
       const parentRect = this.$refs.selection.parentElement

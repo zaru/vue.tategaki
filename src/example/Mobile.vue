@@ -3,7 +3,7 @@
     <vue-tategaki
       class="container"
       key="1"
-      content="<p>これから書くことはそんなにたいしたことではないです。</p><p>ただ単に改行をさせたい気持ちがあるだけなんです。</p>"
+      content=""
       @updated="update"
       :styles="styles1"
       :placeholder="`place holder`"

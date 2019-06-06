@@ -287,9 +287,9 @@ export default {
         }
       } else {
         const activeRange = this.getActiveRange(range, e.target)
-        // this.mergeTextNode(e.target)
-        // MEMO: ここで editor の DOM を全部もとに戻す、こうすうことで re-render させずに node を戻せるっぽい
-        this.$refs.editable.innerHTML = this.$refs.preview.innerHTML
+
+        // TODO: 削除する / ここでもとに戻すと TextNode が flat になるのでだめ
+        // this.$refs.editable.innerHTML = this.$refs.preview.innerHTML
         this.focusEditor(activeRange)
       }
     },
@@ -323,17 +323,17 @@ export default {
     },
     focusEditor(activeRange) {
       // 指定された node と offset から editor node を探索して focus させる
-      const key = activeRange.key
-      let targetNode = [...this.$refs.editable.childNodes].find(node => {
-        return node.dataset && node.dataset.key === key
+      const key = parseInt(activeRange.key)
+      let targetNode = [...this.$refs.editable.childNodes].find((node, index) => {
+        return index === key
       })
       // MEMO: ネストされた node がある場合の対応
       if (!targetNode) {
         targetNode = [...this.$refs.editable.childNodes]
           .map(node => [...node.childNodes])
           .flat()
-          .find(node => {
-            return node.dataset && node.dataset.key === key
+          .find((node, index) => {
+            return index === key
           })
       }
       if (!targetNode) {
@@ -368,6 +368,15 @@ export default {
         this.showCaret = true
         this.focusAndMoveCaret(e, range, false)
       } else {
+
+        // TODO: ここで選択したときに preview の TextNode は分割されている
+        // Range オブジェクト自体も分割されたものを利用しているっぽい
+        // preview to editable に Node を clone できれば一番いいけど
+        // いまはテストで手動で入れている
+        this.$refs.editable.childNodes.forEach((node, index) => {
+          node.replaceWith(this.$refs.preview.childNodes[index].cloneNode(true))
+        })
+
         // TODO: あとで別のモジュールに切り出す
         // 文字列を選択した場合は preview ではなく editable に Range をあてて編集権限を移乗する
         // そうすることでコピペ・カットなど本来のエディタ入力補助がフルに使える。
@@ -379,16 +388,14 @@ export default {
         const endKey = range.endContainer.parentElement.dataset.key
         const endOffset = range.endOffset
 
-        // TODO: この時点で editable の node に data-key がかならずあるわけじゃない
-        console.log(startKey)
-        console.log(this.$refs.editable)
-        console.log([...this.$refs.editable.childNodes])
-        const start = [...this.$refs.editable.childNodes].find(
+        // TODO: この時点で editable の node に data-key がかならずあるわけじゃない…？要確認
+        // TODO: リファクタリング TextNode が分割されていることがあるので text 同士で比較している
+        const start = [...[...this.$refs.editable.childNodes].find(
           node => node.dataset.key === startKey
-        ).childNodes[0]
-        const end = [...this.$refs.editable.childNodes].find(
+        ).childNodes].find(node => node.textContent === range.startContainer.textContent)
+        const end = [...[...this.$refs.editable.childNodes].find(
           node => node.dataset.key === endKey
-        ).childNodes[0]
+        ).childNodes].find(node => node.textContent === range.endContainer.textContent)
         const newRange = document.createRange()
         newRange.setStart(start, startOffset)
         newRange.setEnd(end, endOffset)
