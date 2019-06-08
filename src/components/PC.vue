@@ -298,11 +298,10 @@ export default {
     selected(e) {
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
-      if (range.startOffset === range.endOffset) {
+      if (range.startContainer === range.endContainer && range.startOffset === range.endOffset) {
         this.showCaret = true
         this.focusAndMoveCaret(e, range, false)
       } else {
-
         // Range オブジェクトを利用して caret を同期させるために preview を
         // editable に全く同じ node を入れるようにする
         this.$refs.editable.childNodes.forEach((node, index) => {
