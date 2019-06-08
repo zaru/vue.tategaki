@@ -5,6 +5,7 @@
         contenteditable="true"
         class="tategaki-editable"
         data-key="editor"
+        :data-uid="uid"
         v-html="editContent"
         ref="editable"
         :style="editableStyle"
@@ -17,6 +18,8 @@
         @keydown.37.exact.prevent.stop="arrowKeyMove"
         @keydown.meta.90.prevent.stop="undo"
         @keydown.enter.exact="disableBreakLine"
+        @keydown.meta.65="selectionAll = true"
+        @keydown.delete.exact="$refs.caret.moveCaret()"
         @paste.prevent="pasteText"
         @focus="focus"
         @blur="focusOut"
@@ -25,6 +28,7 @@
       <div
         class="tategaki-preview"
         data-key="editor"
+        :data-uid="uid"
         :data-placeholder="placeholder"
         :data-placeholderactive="placeholderStatus"
         v-html="contentHtml"
@@ -71,6 +75,9 @@ export default {
       type: Object
     },
     placeholder: {
+      type: String
+    },
+    uid: {
       type: String
     }
   },

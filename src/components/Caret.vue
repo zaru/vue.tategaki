@@ -36,6 +36,10 @@ export default {
     visible: {
       type: Boolean,
       default: false
+    },
+    uid: {
+      type: String,
+      require: true
     }
   },
   data() {
@@ -63,26 +67,28 @@ export default {
   },
   methods: {
     moveCaret() {
-      // MEMO: 自身に関係ないイベントは無視している
-      const sel = window.getSelection()
-      if (sel.rangeCount === 0) {
-        return
-      }
-      const parentEditable = sel
-        .getRangeAt(0)
-        .startContainer.parentElement.closest('.tategaki-editable')
-      if (parentEditable !== this.editor) {
-        return
-      }
-
-      // MEMO: safari で日本語変換中に node をいじると二重でテキストが入ってしまうため変換中は caret 移動させない
-      if (ua.name === 'safari' && this.compositing) {
-        this.style.display = 'none'
-      } else {
-        const pos = offset(this.parent, this.viewer, this.offsetRight)
-        this.style.top = `${pos.top}px`
-        this.style.left = `${pos.left}px`
-      }
+      setTimeout(() => {
+        console.log('selectionchange')
+        // MEMO: 自身に関係ないイベントは無視している
+        const sel = window.getSelection()
+        if (sel.rangeCount === 0) {
+          return
+        }
+        const parentEditable = sel
+          .getRangeAt(0)
+          .startContainer.parentElement.closest('.tategaki-editable')
+        console.log(parentEditable)
+        if (parentEditable && parentEditable.dataset.uid === this.uid) {
+          // MEMO: safari で日本語変換中に node をいじると二重でテキストが入ってしまうため変換中は caret 移動させない
+          if (ua.name === 'safari' && this.compositing) {
+            this.style.display = 'none'
+          } else {
+            const pos = offset(this.parent, this.viewer, this.offsetRight)
+            this.style.top = `${pos.top}px`
+            this.style.left = `${pos.left}px`
+          }
+        }
+      }, 0)
     }
   },
   mounted() {

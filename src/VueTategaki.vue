@@ -4,6 +4,7 @@
     :content="content"
     :styles="styles"
     :placeholder="placeholder"
+    :uid="uid()"
     @updated="update"
   ></component>
 </template>
@@ -39,6 +40,10 @@ export default {
   methods: {
     update(method) {
       this.$emit('updated', method)
+    },
+    uid() {
+      const strong = 1000
+      return new Date().getTime().toString(16) + Math.floor(strong * Math.random()).toString(16)
     }
   },
   created() {},
