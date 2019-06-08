@@ -21,8 +21,6 @@
         @keydown.meta.65="selectionAll = true"
         @keydown.delete.exact="moveCaretAndNormalize"
         @paste.prevent="pasteText"
-        @focus="focus"
-        @blur="focusOut"
       ></div>
 
       <div
@@ -115,11 +113,6 @@ export default {
           boxShadow: '',
           fontSize: '16px',
           multiline: true
-        },
-        caret: {
-          display: 'none',
-          top: '0px',
-          left: '0px'
         }
       },
       originalContainerHeight: '',
@@ -151,15 +144,6 @@ export default {
     offsetRight() {
       const ratio = ua.os.includes('Windows') ? 2.5 : 1.5
       return parseInt(this.activeStyles.container.fontSize) * ratio
-    },
-    caretStyle() {
-      return {
-        display: this.activeStyles.caret.display,
-        width: `${parseInt(this.activeStyles.container.fontSize) * 1.4}px`,
-        height: '1px',
-        top: this.activeStyles.caret.top,
-        left: this.activeStyles.caret.left
-      }
     },
     boxStyle() {
       return {
@@ -336,13 +320,6 @@ export default {
         activeRange.startOffset
       )
     },
-    focus() {
-      this.defaultStyles.container.outline = true
-    },
-    focusOut() {
-      this.defaultStyles.container.outline = false
-      this.activeStyles.caret.display = 'none'
-    },
     selectedRange(e) {
       if (ua.name === 'firefox') {
         const range = document.createRange()
@@ -352,8 +329,6 @@ export default {
       return this.currentSelectionAndRange().range
     },
     selected(e) {
-      // TODO: ここで文字列選択時に offset が 0 になるのがバグの原因
-      // テキスト選択時、text node がなぜか分割されておかしくなっているっぽい
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startOffset === range.endOffset) {
@@ -361,10 +336,8 @@ export default {
         this.focusAndMoveCaret(e, range, false)
       } else {
 
-        // TODO: ここで選択したときに preview の TextNode は分割されている
-        // Range オブジェクト自体も分割されたものを利用しているっぽい
-        // preview to editable に Node を clone できれば一番いいけど
-        // いまはテストで手動で入れている
+        // Range オブジェクトを利用して caret を同期させるために preview を
+        // editable に全く同じ node を入れるようにする
         this.$refs.editable.childNodes.forEach((node, index) => {
           node.replaceWith(this.$refs.preview.childNodes[index].cloneNode(true))
         })
@@ -382,18 +355,6 @@ export default {
     compositionend() {
       this.compositing = false
       this.sync()
-    },
-    disableSwipeBack(e) {
-      // TODO: firefox / safari だとうまくうごいていない
-      // エディタ以外のスクロールには関与しない
-      if (!e.path.find(dom => dom.className === 'content-editable-page')) {
-        return
-      }
-      const container = this.$refs.container.getBoundingClientRect()
-      const preview = this.$refs.preview.getBoundingClientRect()
-      if (container.x - 2 < preview.x && e.deltaX < 0) {
-        e.preventDefault()
-      }
     },
     disableBreakLine(e) {
       if (!this.activeStyles.container.multiline) {
@@ -435,11 +396,9 @@ export default {
       this.stackContent = this.content
     }
     document.execCommand('DefaultParagraphSeparator', false, 'p')
-    window.addEventListener('mousewheel', this.disableSwipeBack)
     document.addEventListener('selectionchange', this.resetSelectionFlag)
   },
   destroyed() {
-    window.removeEventListener('mousewheel', this.disableSwipeBack)
     document.removeEventListener('selectionchange', this.resetSelectionFlag)
   }
 }
