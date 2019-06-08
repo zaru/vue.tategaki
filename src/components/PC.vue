@@ -48,7 +48,7 @@
 
       <selection
         v-if="$refs.preview"
-        :parent="$refs.preview"
+        :preview="$refs.preview"
         :content="contentHtml"
         :do-selection-all="getSelectionAll"
       ></selection>

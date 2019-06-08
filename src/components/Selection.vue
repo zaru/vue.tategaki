@@ -11,7 +11,7 @@ export default {
   name: 'Selection',
   components: {},
   props: {
-    parent: {
+    preview: {
       type: HTMLDivElement,
       require: true
     },
@@ -112,7 +112,7 @@ export default {
       const parentPreview = range.startContainer.parentElement.closest(
         '.tategaki-preview'
       )
-      if (parentPreview === this.parent) {
+      if (parentPreview === this.preview) {
         this.makeSelectionInPreview(range)
       }
     },
@@ -130,13 +130,16 @@ export default {
         this.first.width = parseInt(window.getComputedStyle(range.startContainer.parentElement)['font-size'])
       }
 
+      const previewRect = this.preview.getBoundingClientRect()
+      const offsetLeft = previewRect.width + previewRect.left - (parentRect.width + parentRect.left)
+
       const textRange = document.createRange()
       if (range.startOffset + 1 <= range.startContainer.textContent.length) {
         textRange.setStart(range.startContainer, range.startOffset)
         textRange.setEnd(range.startContainer, range.startOffset + 1)
         const textRect = textRange.getBoundingClientRect()
         this.first.top = textRect.top - parentRect.top
-        this.first.left = textRect.left - parentRect.left
+        this.first.left = textRect.left - parentRect.left - offsetLeft
       }
       if (range.startOffset !== range.endOffset && range.endOffset > 0) {
         textRange.setStart(range.endContainer, range.endOffset - 1)
@@ -151,7 +154,7 @@ export default {
 
         if (range.endOffset > 0) {
           this.last.width = this.first.width
-          this.last.left = rect.left - parentRect.left
+          this.last.left = rect.left - parentRect.left - offsetLeft
           this.last.top = rect.top - parentRect.top
           textRange.setStart(range.endContainer, range.endOffset - 1)
           textRange.setEnd(range.endContainer, range.endOffset)
@@ -162,7 +165,7 @@ export default {
         this.middle.width = rect.width - this.first.width - this.last.width
         this.middle.height = rect.height
         this.middle.top = rect.top - parentRect.top
-        this.middle.left = rect.left - parentRect.left + this.first.width
+        this.middle.left = rect.left - parentRect.left + this.first.width - offsetLeft
       } else {
         this.resetMiddleAndLast()
       }
@@ -170,7 +173,7 @@ export default {
       textRange.detach()
     },
     selectAll() {
-      this.parent.childNodes.forEach(node => {
+      this.preview.childNodes.forEach(node => {
         node.style.background = 'rgba(255, 0, 0, .5)'
       })
     }
