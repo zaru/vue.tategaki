@@ -20,6 +20,7 @@
         @keydown.enter.exact="disableBreakLine"
         @keydown.meta.65="selectionAll = true"
         @keydown.delete.exact="moveCaretAndNormalize"
+        @keydown.meta.88="moveCaretAndNormalize"
         @paste.prevent="pasteText"
       ></div>
 
@@ -238,6 +239,7 @@ export default {
       this.$emit('updated', cleanHTML)
     },
     moveCaretAndNormalize() {
+      this.showCaret = true
       this.$refs.caret.moveCaret()
       this.normalize(this.$refs.editable.childNodes)
     },

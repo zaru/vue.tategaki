@@ -86,7 +86,7 @@ export default {
             this.style.left = `${pos.left}px`
           }
         }
-      }, 0)
+      }, 10)
     }
   },
   mounted() {
