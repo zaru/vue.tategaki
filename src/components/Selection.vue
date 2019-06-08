@@ -127,20 +127,7 @@ export default {
         .getBoundingClientRect()
 
       if (this.first.width === 0) {
-        // MEMO: cloneNode は値をコピーして互いに影響を与えないはずなんだけど
-        // 対象の TextNode が分割されたりで影響しているような気がする…
-        // insertNode が対象の TextNode にたいして行っているから…か。うーん
-        //
-        // 選択時に真横に移動しとき、初回 Range 取得で2行分になってしまうため
-        // 1文字分の幅を取得するためにダミーを挿入
-        const clone = range.cloneRange()
-        const shadowCaret = document.createTextNode('　')
-        clone.insertNode(shadowCaret)
-        clone.selectNode(shadowCaret)
-        const rect = clone.getBoundingClientRect()
-        shadowCaret.parentNode.removeChild(shadowCaret)
-        clone.detach()
-        this.first.width = rect.width
+        this.first.width = parseInt(window.getComputedStyle(range.startContainer.parentElement)['font-size'])
       }
 
       const textRange = document.createRange()
@@ -151,7 +138,7 @@ export default {
         this.first.top = textRect.top - parentRect.top
         this.first.left = textRect.left - parentRect.left
       }
-      if (range.endOffset > 0 && this.first.top > 0) {
+      if (range.startOffset !== range.endOffset && range.endOffset > 0) {
         textRange.setStart(range.endContainer, range.endOffset - 1)
         textRange.setEnd(range.endContainer, range.endOffset)
         const textRect = textRange.getBoundingClientRect()
