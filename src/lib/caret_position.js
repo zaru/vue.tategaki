@@ -14,6 +14,9 @@ const getPosition = (clone, range, fixedPosition) => {
   if (range.endContainer.nodeName === 'BR') {
     clone.detach()
     return range.endContainer.parentElement.getBoundingClientRect()
+  } else if (range.endContainer.textContent === '') {
+    clone.detach()
+    return range.endContainer.getBoundingClientRect()
   } else {
     clone.setStart(range.endContainer, fixedPosition)
     clone.setEnd(range.endContainer, fixedPosition + 1)

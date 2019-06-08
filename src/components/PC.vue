@@ -179,7 +179,7 @@ export default {
       }
     },
     placeholderStatus() {
-      return this.contentHtml === '<p data-key="0">​</p>'
+      return this.contentHtml === '<p data-key="0"></p>'
     }
   },
   methods: {
@@ -454,9 +454,9 @@ export default {
   },
   mounted() {
     if (!this.content) {
-      this.previewContent = '<p>&#8203;</p>'
-      this.innerContent = '<p>&#8203;</p>'
-      this.stackContent = '<p>&#8203;</p>'
+      this.previewContent = '<p></p>'
+      this.innerContent = '<p></p>'
+      this.stackContent = '<p></p>'
     } else {
       this.previewContent = this.content
       this.innerContent = this.content
@@ -482,6 +482,7 @@ export default {
 .tategaki-container >>> p {
   margin: 0;
   padding: 0;
+  min-width: 1rem;
 }
 .tategaki-container >>> p::selection {
   background: transparent;
@@ -494,6 +495,8 @@ export default {
   opacity: 0;
   color: #f00;
   background-color: #ddd;
+  width: 100%;
+  height: 100%;
 }
 .tategaki-preview {
   box-sizing: border-box;
@@ -502,6 +505,8 @@ export default {
   position: absolute;
   top: 0px;
   right: 0px;
+  width: 100%;
+  height: 100%;
 }
 [data-placeholder][data-placeholderactive='true']:before {
   content: attr(data-placeholder);
