@@ -19,7 +19,7 @@
         @keydown.meta.90.prevent.stop="undo"
         @keydown.enter.exact="disableBreakLine"
         @keydown.meta.65="selectionAll = true"
-        @keydown.delete.exact="$refs.caret.moveCaret()"
+        @keydown.delete.exact="moveCaretAndNormalize"
         @paste.prevent="pasteText"
         @focus="focus"
         @blur="focusOut"
@@ -225,6 +225,12 @@ export default {
         .join('')
         .replace('&#8203;', '')
     },
+    normalize(nodes) {
+      // TODO: もし <p></p> の中に入れ子の HTML 構造ができた場合は、判定して再起させる必要がある
+      nodes.forEach(e => {
+        e.normalize()
+      })
+    },
     currentSelectionAndRange() {
       const sel = window.getSelection()
       return { sel: sel, range: sel.getRangeAt(0) }
@@ -244,6 +250,10 @@ export default {
         this.stackRange = this.selectedRange()
       }
       this.$emit('updated', cleanHTML)
+    },
+    moveCaretAndNormalize() {
+      this.$refs.caret.moveCaret()
+      this.normalize(this.$refs.editable.childNodes)
     },
     arrowKeyMove(e) {
       // TODO: 別モジュールに切り出す
@@ -481,7 +491,6 @@ export default {
     document.execCommand('DefaultParagraphSeparator', false, 'p')
     window.addEventListener('mousewheel', this.disableSwipeBack)
     document.addEventListener('selectionchange', this.resetSelectionFlag)
-    console.log(this._uid)
   },
   destroyed() {
     window.removeEventListener('mousewheel', this.disableSwipeBack)

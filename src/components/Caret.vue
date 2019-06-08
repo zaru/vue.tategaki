@@ -68,7 +68,6 @@ export default {
   methods: {
     moveCaret() {
       setTimeout(() => {
-        console.log('selectionchange')
         // MEMO: 自身に関係ないイベントは無視している
         const sel = window.getSelection()
         if (sel.rangeCount === 0) {
@@ -77,7 +76,6 @@ export default {
         const parentEditable = sel
           .getRangeAt(0)
           .startContainer.parentElement.closest('.tategaki-editable')
-        console.log(parentEditable)
         if (parentEditable && parentEditable.dataset.uid === this.uid) {
           // MEMO: safari で日本語変換中に node をいじると二重でテキストが入ってしまうため変換中は caret 移動させない
           if (ua.name === 'safari' && this.compositing) {

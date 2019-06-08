@@ -193,6 +193,7 @@ export default {
     document
       .querySelector('.tategaki-editable')
       .addEventListener('blur', this.resetAll)
+
   },
   destroyed() {
     document.removeEventListener('selectionchange', this.selection)
