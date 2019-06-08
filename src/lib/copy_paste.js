@@ -4,14 +4,9 @@ const hasBreakLine = text => {
 
 const getNode = text => {
   if (hasBreakLine(text)) {
-    const textList = text.split('\n')
-    const cleanHTMLs = [
-      textList.shift(),
-      ...textList.map(line => {
-        return line ? `<p>${line}</p>` : `<p><br></p>`
-      })
-    ]
-    return cleanHTMLs.join('')
+    return text.split('\n').map(line => {
+      return line ? `<p>${line}</p>` : `<p><br></p>`
+    }).join('')
   }
   return text
 }
