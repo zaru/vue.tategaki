@@ -17,7 +17,7 @@
         @keydown.39.exact.prevent.stop="arrowKeyMove"
         @keydown.37.exact.prevent.stop="arrowKeyMove"
         @keydown.meta.90.prevent.stop="undo"
-        @keydown.enter.exact="disableBreakLine"
+        @keydown.enter.exact="moveCaretAndNormalize"
         @keydown.meta.65="selectionAll = true"
         @keydown.delete.exact="moveCaretAndNormalize"
         @keydown.meta.88="moveCaretAndNormalize"
@@ -113,8 +113,7 @@ export default {
           // このスタイルはもはや必要ないかもしれない
           // boxShadow: '0 0 5px 0px rgba(0, 123, 255, .4)',
           boxShadow: '',
-          fontSize: '16px',
-          multiline: true
+          fontSize: '16px'
         }
       },
       originalContainerHeight: '',
@@ -323,12 +322,6 @@ export default {
     compositionend() {
       this.compositing = false
       this.sync()
-    },
-    disableBreakLine(e) {
-      if (!this.activeStyles.container.multiline) {
-        e.preventDefault()
-        return
-      }
     },
     undo() {
       const buffer = this.stackBuffer.current
