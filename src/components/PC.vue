@@ -65,6 +65,7 @@ import Selection from './Selection.vue'
 import StackBuffer from '../lib/stack_buffer'
 import { paste } from '../lib/copy_paste'
 import { horizontalMove, verticalMove } from '../lib/arrow_key_move'
+import { syncCaret } from '../lib/sync_caret'
 const ua = browser()
 
 export default {
@@ -368,30 +369,7 @@ export default {
           node.replaceWith(this.$refs.preview.childNodes[index].cloneNode(true))
         })
 
-        // TODO: あとで別のモジュールに切り出す
-        // 文字列を選択した場合は preview ではなく editable に Range をあてて編集権限を移乗する
-        // そうすることでコピペ・カットなど本来のエディタ入力補助がフルに使える。
-        // ただし、選択後直接文字入力した際には変換候補が文字にかぶるが許容する
-        const sel = window.getSelection()
-        const range = sel.getRangeAt(0)
-        const startKey = range.startContainer.parentElement.dataset.key
-        const startOffset = range.startOffset
-        const endKey = range.endContainer.parentElement.dataset.key
-        const endOffset = range.endOffset
-
-        // TODO: この時点で editable の node に data-key がかならずあるわけじゃない…？要確認
-        // TODO: リファクタリング TextNode が分割されていることがあるので text 同士で比較している
-        const start = [...[...this.$refs.editable.childNodes].find(
-          node => node.dataset.key === startKey
-        ).childNodes].find(node => node.textContent === range.startContainer.textContent)
-        const end = [...[...this.$refs.editable.childNodes].find(
-          node => node.dataset.key === endKey
-        ).childNodes].find(node => node.textContent === range.endContainer.textContent)
-        const newRange = document.createRange()
-        newRange.setStart(start, startOffset)
-        newRange.setEnd(end, endOffset)
-        sel.removeAllRanges()
-        sel.addRange(newRange)
+        syncCaret(this.$refs.editable)
       }
     },
     pasteText(e) {
