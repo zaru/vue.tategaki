@@ -64,6 +64,7 @@ import Caret from './Caret.vue'
 import Selection from './Selection.vue'
 import StackBuffer from '../lib/stack_buffer'
 import { paste } from '../lib/copy_paste'
+import { horizontalMove, verticalMove } from '../lib/arrow_key_move'
 const ua = browser()
 
 export default {
@@ -256,44 +257,11 @@ export default {
       this.normalize(this.$refs.editable.childNodes)
     },
     arrowKeyMove(e) {
-      // TODO: 別モジュールに切り出す
       if (e.keyCode === 38 || e.keyCode === 40) {
-        const sel = window.getSelection()
-        const range = sel.getRangeAt(0)
-        const startOffset = e.keyCode === 38 ? -1 : 1
-        if (range.commonAncestorContainer.nodeValue === null) {
-          // TODO: Node またぎの移動をサポートする
-        } else if (
-          range.commonAncestorContainer.nodeValue.length >=
-            range.startOffset + startOffset &&
-          0 <= range.startOffset + startOffset
-        ) {
-          range.setStart(sel.anchorNode, range.startOffset + startOffset)
-          range.setEnd(sel.anchorNode, range.startOffset)
-        }
+        horizontalMove(e)
       } else if (e.keyCode === 37 || e.keyCode === 39) {
-        const caretRect = this.$refs.caret.$el.getBoundingClientRect()
-        let newX = caretRect.x
-        let newY = caretRect.y
-        if (e.keyCode === 37) {
-          newX -= parseInt(this.activeStyles.container.fontSize)
-        } else if (e.keyCode === 39) {
-          newX += parseInt(this.activeStyles.container.fontSize) * 2
-        }
-        let range, elem
-        if (document.caretRangeFromPoint) {
-          range = document.caretRangeFromPoint(newX, newY)
-          elem = document.elementFromPoint(newX, newY)
-        } else {
-          const pos = document.caretPositionFromPoint(newX, newY)
-          elem = document.elementFromPoint(newX, newY)
-          range = document.createRange()
-          range.setStart(pos.offsetNode, pos.offset)
-        }
-        const dummyEvt = {
-          target: elem
-        }
-        this.focusAndMoveCaret(dummyEvt, range)
+        const { event, range } = verticalMove(e, this.$refs.caret.$el, this.activeStyles.container.fontSize)
+        this.focusAndMoveCaret(event, range)
       }
     },
     focusAndMoveCaret(e, range) {
