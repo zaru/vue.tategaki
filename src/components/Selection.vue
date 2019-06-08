@@ -18,6 +18,10 @@ export default {
     content: {
       type: String,
       require: true
+    },
+    doSelectionAll: {
+      type: Boolean,
+      require: true
     }
   },
   data() {
@@ -47,6 +51,11 @@ export default {
   watch: {
     content() {
       this.resetAll()
+    },
+    doSelectionAll() {
+      if (this.doSelectionAll) {
+        this.selectAll()
+      }
     }
   },
   computed: {
@@ -103,9 +112,11 @@ export default {
       const parentPreview = range.startContainer.parentElement.closest(
         '.tategaki-preview'
       )
-      if (parentPreview !== this.parent) {
-        return
+      if (parentPreview === this.parent) {
+        this.makeSelectionInPreview(range)
       }
+    },
+    makeSelectionInPreview(range) {
       if (range.startContainer === range.endContainer && range.startOffset === range.endOffset) {
         return
       }
@@ -170,6 +181,11 @@ export default {
       }
 
       textRange.detach()
+    },
+    selectAll() {
+      this.parent.childNodes.forEach(node => {
+        node.style.background = 'rgba(255, 0, 0, .5)'
+      })
     }
   },
   mounted() {

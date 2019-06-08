@@ -44,12 +44,14 @@
         :editor="$refs.editable"
         :viewer="$refs.container"
         :visible="showCaret"
+        :uid="uid"
       ></caret>
 
       <selection
         v-if="$refs.preview"
         :parent="$refs.preview"
         :content="contentHtml"
+        :do-selection-all="getSelectionAll"
       ></selection>
     </div>
   </div>
@@ -133,7 +135,8 @@ export default {
         startOffset: 0,
         endOffset: 0
       },
-      showCaret: false
+      showCaret: false,
+      selectionAll: false
     }
   },
   computed: {
@@ -187,6 +190,9 @@ export default {
     },
     placeholderStatus() {
       return this.contentHtml === '<p data-key="0"></p>'
+    },
+    getSelectionAll() {
+      return this.selectionAll
     }
   },
   methods: {
@@ -453,6 +459,9 @@ export default {
         newRange.setEnd(buffer.range.endContainer, buffer.range.endOffset)
         this.focusAndMoveCaret({ target: this.$refs.editable }, newRange)
       }
+    },
+    resetSelectionFlag() {
+      this.selectionAll = false
     }
   },
   created() {
@@ -471,9 +480,12 @@ export default {
     }
     document.execCommand('DefaultParagraphSeparator', false, 'p')
     window.addEventListener('mousewheel', this.disableSwipeBack)
+    document.addEventListener('selectionchange', this.resetSelectionFlag)
+    console.log(this._uid)
   },
   destroyed() {
     window.removeEventListener('mousewheel', this.disableSwipeBack)
+    document.removeEventListener('selectionchange', this.resetSelectionFlag)
   }
 }
 </script>
