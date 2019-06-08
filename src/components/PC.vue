@@ -65,6 +65,7 @@ import StackBuffer from '../lib/stack_buffer'
 import { paste } from '../lib/copy_paste'
 import { horizontalMove, verticalMove } from '../lib/arrow_key_move'
 import { syncCaret } from '../lib/sync_caret'
+import { indexedHTML, cleanHTML, normalizeHTML } from '../lib/format_html'
 const ua = browser()
 
 export default {
@@ -137,10 +138,10 @@ export default {
   },
   computed: {
     editContent() {
-      return this.indexedHtml(this.innerContent)
+      return indexedHTML(this.innerContent)
     },
     contentHtml() {
-      return this.indexedHtml(this.previewContent)
+      return indexedHTML(this.previewContent)
     },
     offsetRight() {
       const ratio = ua.os.includes('Windows') ? 2.5 : 1.5
@@ -183,49 +184,14 @@ export default {
     }
   },
   methods: {
-    indexedHtml(content) {
-      const div = document.createElement('div')
-      div.innerHTML = content
-      div.childNodes.forEach((node, index) => {
-        if (node.dataset) {
-          node.dataset.key = index
-        }
-        node.childNodes.forEach((node, c_index) => {
-          if (node.dataset) {
-            node.dataset.key = `${index}-${c_index}`
-          }
-        })
-      })
-      return div.innerHTML
-    },
-    cleanHtml(nodes) {
-      return [...nodes]
-        .map(e => {
-          e.removeAttribute('data-key')
-          ;[...e.childNodes].map(e => {
-            if (e.nodeType === 1) {
-              e.removeAttribute('data-key')
-            }
-          })
-          return e.outerHTML
-        })
-        .join('')
-        .replace('&#8203;', '')
-    },
-    normalize(nodes) {
-      // TODO: もし <p></p> の中に入れ子の HTML 構造ができた場合は、判定して再起させる必要がある
-      nodes.forEach(e => {
-        e.normalize()
-      })
-    },
     currentSelectionAndRange() {
       const sel = window.getSelection()
       return { sel: sel, range: sel.getRangeAt(0) }
     },
     sync() {
       const nodes = this.$refs.editable.childNodes
-      const cleanHTML = this.cleanHtml(nodes)
-      this.previewContent = cleanHTML
+      const html = cleanHTML(nodes)
+      this.previewContent = html
       if (!this.compositing) {
         const memoRange = {}
         memoRange.startContainer = this.stackRange.startContainer
@@ -233,15 +199,15 @@ export default {
         memoRange.startOffset = this.stackRange.startOffset
         memoRange.endOffset = this.stackRange.endOffset
         this.stackBuffer.stack(this.stackContent, memoRange)
-        this.stackContent = cleanHTML
+        this.stackContent = html
         this.stackRange = this.selectedRange()
       }
-      this.$emit('updated', cleanHTML)
+      this.$emit('updated', html)
     },
     moveCaretAndNormalize() {
       this.showCaret = true
       this.$refs.caret.moveCaret()
-      this.normalize(this.$refs.editable.childNodes)
+      normalizeHTML(this.$refs.editable.childNodes)
     },
     arrowKeyMove(e) {
       if (e.keyCode === 38 || e.keyCode === 40) {
