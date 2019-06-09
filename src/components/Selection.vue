@@ -174,7 +174,7 @@ export default {
     },
     selectAll() {
       this.preview.childNodes.forEach(node => {
-        node.style.background = 'rgba(255, 0, 0, .5)'
+        node.style.background = '#ffacb6'
       })
     }
   },
@@ -197,7 +197,7 @@ export default {
 <style scoped>
 .selection {
   position: absolute;
-  background: #f00;
-  opacity: 0.5;
+  background: #ffacb6;
+  /*opacity: 0.5;*/
 }
 </style>
