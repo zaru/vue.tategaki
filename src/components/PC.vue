@@ -16,7 +16,6 @@
         @keydown.40.exact.prevent.stop="arrowKeyMove"
         @keydown.39.exact.prevent.stop="arrowKeyMove"
         @keydown.37.exact.prevent.stop="arrowKeyMove"
-        @keydown.meta.90.prevent.stop="undo"
         @keydown.enter.exact="moveCaretAndNormalize"
         @keydown.meta.65="selectionAll = true"
         @keydown.delete.exact="moveCaretAndNormalize"
@@ -395,7 +394,8 @@ export default {
   box-sizing: border-box;
   opacity: 1;
   z-index: 2;
-  position: absolute;
+  /* MEMO: ここを absolute にしていたけど、それだと組み込むときにつぶれるので relative へ、もし何らかの不具合があったらここがあやしい*/
+  position: relative;
   top: 0px;
   right: 0px;
   width: 100%;

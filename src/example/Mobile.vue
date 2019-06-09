@@ -9,6 +9,15 @@
       :placeholder="`place holder`"
     >
     </vue-tategaki>
+    <vue-tategaki
+      class="container"
+      key="2"
+      content=""
+      @updated="update"
+      :styles="styles2"
+      :placeholder="`place holder`"
+    >
+    </vue-tategaki>
   </div>
 </template>
 
@@ -29,12 +38,23 @@ export default Vue.extend({
           height: '200px',
           fontSize: '16px'
         }
+      },
+      styles2: {
+        container: {
+          minWidth: '100%',
+          height: '200px',
+          fontSize: '18px'
+        }
       }
     }
   },
   methods: {
     update(e) {
       console.log(e)
+      // TODO: noco に組み込んだときに選択範囲が微妙にずれる原因を探る
+      // TODO: 選択した後に、他の箇所をクリックしても選択範囲（見た目の）が解除されない
+      // TODO: noco でテキスト入力時に、文字がちらつく（なんらかの更新処理がre-renderみたいになってる？）
+
     }
   },
   mounted() {}
@@ -49,5 +69,9 @@ export default Vue.extend({
 }
 #app >>> p {
   padding: 0 5px;
+  line-height: 225%;
 }
+  .container {
+    /*width: 300px;*/
+  }
 </style>
