@@ -11,6 +11,8 @@
         :data-placeholder="placeholder"
         :data-placeholderactive="placeholderStatus"
         @input="sync"
+        @focus="setEditMode"
+        @blur="setViewMode"
       ></div>
     </div>
   </div>
@@ -18,6 +20,7 @@
 
 <script>
 import merge from 'lodash.merge'
+import { indexedHTML, cleanHTML } from '../lib/format_html'
 import { paste } from '../lib/copy_paste'
 
 export default {
@@ -39,104 +42,60 @@ export default {
       activeStyles: {},
       defaultStyles: {
         box: {
-          height: 'auto',
-          position: 'static',
-          top: '0',
-          left: '0',
-          right: '0',
-          bottom: '0',
-          background: 'auto',
-          zIndex: '9999'
         },
         container: {
-          minWidth: '100%',
-          height: '100%',
-          position: 'relative',
-          top: '10px',
-          left: '0',
-          right: '0',
-          bottom: '0',
           fontSize: '16px'
         }
       },
       originalContainerHeight: '',
       innerContent: '',
-      previewContent: ''
+      previewContent: '',
+      editMode: false
     }
   },
   computed: {
     editContent() {
-      return this.indexedHtml(this.innerContent)
+      return indexedHTML(this.innerContent)
     },
     contentHtml() {
-      return this.indexedHtml(this.previewContent)
+      return indexedHTML(this.previewContent)
     },
     boxStyle() {
       return {
-        height: this.activeStyles.box.height,
-        position: this.activeStyles.box.position,
-        top: this.activeStyles.box.top,
-        left: this.activeStyles.box.left,
-        right: this.activeStyles.box.right,
-        bottom: this.activeStyles.box.bottom,
-        background: this.activeStyles.box.background,
-        zIndex: this.activeStyles.box.zIndex
       }
     },
     containerStyle() {
       return {
-        fontSize: this.activeStyles.container.fontSize,
-        minWidth: this.activeStyles.container.minWidth,
-        height: this.activeStyles.container.height,
-        position: this.activeStyles.container.position,
-        top: this.activeStyles.container.top,
-        left: this.activeStyles.container.left,
-        right: this.activeStyles.container.right,
-        bottom: this.activeStyles.container.bottom
+        fontSize: this.activeStyles.container.fontSize
       }
     },
     editableStyle() {
-      return {}
+      return {
+        writingMode: this.editMode ? 'horizontal-tb' : 'vertical-rl',
+        top: this.editMode ? '0px' : 'auto',
+        right: this.editMode ? '0px' : 'auto',
+        bottom: this.editMode ? '0px' : 'auto',
+        left: this.editMode ? '0px' : 'auto',
+        width: this.editMode ? `${window.innerWidth}px` : 'auto',
+        height: this.editMode ? `${window.innerHeight}px` : 'auto'
+      }
     },
     placeholderStatus() {
-      return this.contentHtml === '<p data-key="0">​</p>'
+      return this.contentHtml === '<p data-key="0"></p>'
     }
   },
   methods: {
-    indexedHtml(content) {
-      const div = document.createElement('div')
-      div.innerHTML = content
-      div.childNodes.forEach((node, index) => {
-        if (node.dataset) {
-          node.dataset.key = index
-        }
-        node.childNodes.forEach((node, c_index) => {
-          if (node.dataset) {
-            node.dataset.key = `${index}-${c_index}`
-          }
-        })
-      })
-      return div.innerHTML
+    setEditMode() {
+      this.editMode = true
     },
-    cleanHtml(nodes) {
-      return [...nodes]
-        .map(e => {
-          e.removeAttribute('data-key')
-          ;[...e.childNodes].map(e => {
-            if (e.nodeType === 1) {
-              e.removeAttribute('data-key')
-            }
-          })
-          return e.outerHTML
-        })
-        .join('')
-        .replace('&#8203;', '')
+    setViewMode() {
+      this.editMode = false
     },
     sync() {
       const nodes = this.$refs.editable.childNodes
-      const cleanHTML = this.cleanHtml(nodes)
-      this.previewContent = cleanHTML
-      this.$emit('updated', cleanHTML)
+      const html = cleanHTML(nodes)
+      this.previewContent = html
+      this.$emit('updated', html)
     },
     pasteText(e) {
       paste(e)
@@ -149,8 +108,8 @@ export default {
   },
   mounted() {
     if (!this.content) {
-      this.innerContent = '<p>&#8203;</p>'
-      this.previewContent = '<p>&#8203;</p>'
+      this.innerContent = '<p></p>'
+      this.previewContent = '<p></p>'
     } else {
       this.innerContent = this.content
       this.previewContent = this.content
@@ -162,10 +121,7 @@ export default {
 
 <style scoped>
 .tategaki-container {
-  position: relative;
   word-break: break-all;
-  overflow-y: scroll;
-  overflow-x: scroll;
 }
 .tategaki-container >>> p {
   margin: 0;
@@ -182,8 +138,5 @@ export default {
   opacity: 0.5;
 }
 .tategaki-editable {
-  user-select: text;
-  -webkit-user-select: text;
-  caret-color: transparent;
 }
 </style>
