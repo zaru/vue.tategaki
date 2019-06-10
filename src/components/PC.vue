@@ -402,6 +402,8 @@ export default {
 [data-placeholder][data-placeholderactive='true']:before {
   content: attr(data-placeholder);
   opacity: 0.5;
+  position: absolute;
+  /* TODO: ここで p の line-height を取得して設定しないと微妙に位置がずれる */
 }
 .tategaki-editable,
 .tategaki-preview {
