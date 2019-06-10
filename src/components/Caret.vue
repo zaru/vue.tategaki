@@ -1,5 +1,5 @@
 <template>
-  <div v-show="focusing" class="caret" ref="caret" :style="caretStyle">
+  <div v-show="visible" class="caret" ref="caret" :style="caretStyle">
     <svg><rect x="0" y="0" width="100%" height="1"></rect></svg>
   </div>
 </template>
@@ -42,7 +42,6 @@ export default {
     return {
       focusing: false,
       style: {
-        display: 'none',
         top: '0px',
         left: '0px'
       }
@@ -60,6 +59,9 @@ export default {
     offsetRight() {
       const ratio = ua.os.includes('Windows') ? 2.5 : 1.5
       return parseInt(this.fontSize) * ratio
+    },
+    visible () {
+      return this.focusing
     }
   },
   methods: {
@@ -118,7 +120,7 @@ export default {
   display: block;
   position: absolute;
   width: 2px;
-  z-index: 1;
+  z-index: 9999;
 }
 .caret svg {
   width: inherit;

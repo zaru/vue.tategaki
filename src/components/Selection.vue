@@ -95,6 +95,7 @@ export default {
       this.first.top = 0
       this.first.left = 0
       this.resetMiddleAndLast()
+      this.deselectAll()
     },
     resetMiddleAndLast() {
       this.last.width = 0
@@ -122,6 +123,7 @@ export default {
     },
     makeSelectionInPreview(range) {
       if (range.startContainer === range.endContainer && range.startOffset === range.endOffset) {
+        this.deselectAll()
         return
       }
 
@@ -179,6 +181,11 @@ export default {
     selectAll() {
       this.preview.childNodes.forEach(node => {
         node.style.background = '#ffacb6'
+      })
+    },
+    deselectAll() {
+      this.preview.childNodes.forEach(node => {
+        node.style.background = 'none'
       })
     }
   },

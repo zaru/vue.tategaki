@@ -5,8 +5,11 @@ const getPositionAtLast = clone => {
   clone.insertNode(shadowCaret)
   clone.selectNode(shadowCaret)
   const rect = clone.getBoundingClientRect()
+  const parent = shadowCaret.parentNode
   shadowCaret.parentNode.removeChild(shadowCaret)
   clone.detach()
+  // 空白の TextNode ができてしまうため remove したあとに normalize で完全に削除する
+  parent.normalize()
   return rect
 }
 
