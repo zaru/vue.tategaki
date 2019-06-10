@@ -1,5 +1,5 @@
 <template>
-  <div v-show="visible" class="caret" ref="caret" :style="caretStyle">
+  <div v-show="focusing" class="caret" ref="caret" :style="caretStyle">
     <svg><rect x="0" y="0" width="100%" height="1"></rect></svg>
   </div>
 </template>
@@ -33,10 +33,6 @@ export default {
       type: HTMLDivElement,
       require: true
     },
-    visible: {
-      type: Boolean,
-      default: false
-    },
     uid: {
       type: String,
       require: true
@@ -44,6 +40,7 @@ export default {
   },
   data() {
     return {
+      focusing: false,
       style: {
         display: 'none',
         top: '0px',
@@ -66,6 +63,12 @@ export default {
     }
   },
   methods: {
+    blur() {
+      this.focusing = false
+    },
+    focus() {
+      this.focusing = true
+    },
     moveCaret() {
       setTimeout(() => {
         // MEMO: 自身に関係ないイベントは無視している
@@ -91,9 +94,21 @@ export default {
   },
   mounted() {
     document.addEventListener('selectionchange', this.moveCaret)
+    document
+      .querySelector(`[data-uid="${this.uid}"]`)
+      .addEventListener('blur', this.blur)
+    document
+      .querySelector(`[data-uid="${this.uid}"]`)
+      .addEventListener('focus', this.focus)
   },
   destroyed() {
     document.removeEventListener('selectionchange', this.moveCaret)
+    document
+      .querySelector(`[data-uid="${this.uid}"]`)
+      .removeEventListener('blur', this.blur)
+    document
+      .querySelector(`[data-uid="${this.uid}"]`)
+      .removeEventListener('focus', this.focus)
   }
 }
 </script>

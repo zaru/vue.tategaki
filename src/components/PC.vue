@@ -41,7 +41,6 @@
         :parent="$refs.preview"
         :editor="$refs.editable"
         :viewer="$refs.container"
-        :visible="showCaret"
         :uid="uid"
       ></caret>
 
@@ -130,7 +129,6 @@ export default {
         startOffset: 0,
         endOffset: 0
       },
-      showCaret: false,
       selectionAll: false
     }
   },
@@ -203,7 +201,6 @@ export default {
       this.$emit('updated', html)
     },
     moveCaretAndNormalize() {
-      this.showCaret = true
       this.$refs.caret.moveCaret()
       normalizeHTML(this.$refs.editable.childNodes)
     },
@@ -298,7 +295,6 @@ export default {
       const range = this.selectedRange(e)
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startContainer === range.endContainer && range.startOffset === range.endOffset) {
-        this.showCaret = true
         this.focusAndMoveCaret(e, range, false)
       } else {
         // Range オブジェクトを利用して caret を同期させるために preview を
