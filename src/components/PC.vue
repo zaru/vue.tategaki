@@ -49,6 +49,7 @@
         :preview="$refs.preview"
         :content="contentHtml"
         :do-selection-all="getSelectionAll"
+        :uid="uid"
       ></selection>
     </div>
   </div>
@@ -80,7 +81,8 @@ export default {
       type: String
     },
     uid: {
-      type: String
+      type: String,
+      require: true
     }
   },
   data() {

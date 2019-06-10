@@ -22,6 +22,10 @@ export default {
     doSelectionAll: {
       type: Boolean,
       require: true
+    },
+    uid: {
+      type: String,
+      require: true
     }
   },
   data() {
@@ -181,14 +185,14 @@ export default {
   mounted() {
     document.addEventListener('selectionchange', this.selection)
     document
-      .querySelector('.tategaki-editable')
+      .querySelector(`[data-uid="${this.uid}"]`)
       .addEventListener('blur', this.resetAll)
 
   },
   destroyed() {
     document.removeEventListener('selectionchange', this.selection)
     document
-      .querySelector('.tategaki-editable')
+      .querySelector(`[data-uid="${this.uid}"]`)
       .removeEventListener('blur', this.resetAll)
   }
 }
