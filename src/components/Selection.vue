@@ -192,14 +192,14 @@ export default {
   mounted() {
     document.addEventListener('selectionchange', this.selection)
     document
-      .querySelector(`[data-uid="${this.uid}"]`)
+      .querySelector(`[data-uid="${this.uid}"].tategaki-editable`)
       .addEventListener('blur', this.resetAll)
 
   },
   destroyed() {
     document.removeEventListener('selectionchange', this.selection)
     document
-      .querySelector(`[data-uid="${this.uid}"]`)
+      .querySelector(`[data-uid="${this.uid}"].tategaki-editable`)
       .removeEventListener('blur', this.resetAll)
   }
 }

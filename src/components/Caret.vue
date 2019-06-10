@@ -97,19 +97,19 @@ export default {
   mounted() {
     document.addEventListener('selectionchange', this.moveCaret)
     document
-      .querySelector(`[data-uid="${this.uid}"]`)
+      .querySelector(`[data-uid="${this.uid}"].tategaki-editable`)
       .addEventListener('blur', this.blur)
     document
-      .querySelector(`[data-uid="${this.uid}"]`)
+      .querySelector(`[data-uid="${this.uid}"].tategaki-editable`)
       .addEventListener('focus', this.focus)
   },
   destroyed() {
     document.removeEventListener('selectionchange', this.moveCaret)
     document
-      .querySelector(`[data-uid="${this.uid}"]`)
+      .querySelector(`[data-uid="${this.uid}"].tategaki-editable`)
       .removeEventListener('blur', this.blur)
     document
-      .querySelector(`[data-uid="${this.uid}"]`)
+      .querySelector(`[data-uid="${this.uid}"].tategaki-editable`)
       .removeEventListener('focus', this.focus)
   }
 }
