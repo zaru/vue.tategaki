@@ -15,15 +15,14 @@ const getPositionAtLast = clone => {
 
 const getPosition = (clone, range, fixedPosition) => {
   if (range.endContainer.nodeName === 'BR') {
-    clone.detach()
-    return range.endContainer.parentElement.getBoundingClientRect()
+    clone.setStart(range.endContainer.parentNode, fixedPosition)
+    clone.setEnd(range.endContainer.parentNode, fixedPosition + 1)
+    return getPositionAtLast(clone)
   } else if (range.endContainer.textContent === '') {
-    clone.detach()
-    return range.endContainer.getBoundingClientRect()
-  } else {
-    clone.setStart(range.endContainer, fixedPosition)
-    clone.setEnd(range.endContainer, fixedPosition + 1)
+    return getPositionAtLast(clone)
   }
+  clone.setStart(range.endContainer, fixedPosition)
+  clone.setEnd(range.endContainer, fixedPosition + 1)
   const rect = clone.getBoundingClientRect()
   clone.detach()
   return rect
