@@ -35,3 +35,9 @@ export const normalizeHTML = nodes => {
     e.normalize()
   })
 }
+
+export const extractText = content => {
+  const div = document.createElement('div')
+  div.innerHTML = content
+  return div.innerText
+}

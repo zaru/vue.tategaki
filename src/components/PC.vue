@@ -64,7 +64,7 @@ import StackBuffer from '../lib/stack_buffer'
 import { paste } from '../lib/copy_paste'
 import { horizontalMove, verticalMove } from '../lib/arrow_key_move'
 import { syncCaret } from '../lib/sync_caret'
-import { indexedHTML, cleanHTML, normalizeHTML } from '../lib/format_html'
+import { indexedHTML, cleanHTML, normalizeHTML, extractText } from '../lib/format_html'
 const ua = browser()
 
 export default {
@@ -175,7 +175,7 @@ export default {
       }
     },
     placeholderStatus() {
-      return this.contentHtml === '<p data-key="0"></p>'
+      return extractText(this.previewContent) === ''
     },
     getSelectionAll() {
       return this.selectionAll
