@@ -344,9 +344,9 @@ export default {
   },
   mounted() {
     if (!this.content) {
-      this.previewContent = '<p></p>'
-      this.innerContent = '<p></p>'
-      this.stackContent = '<p></p>'
+      this.previewContent = '<p><br></p>'
+      this.innerContent = '<p><br></p>'
+      this.stackContent = '<p><br></p>'
     } else {
       this.previewContent = this.content
       this.innerContent = this.content
@@ -366,8 +366,9 @@ export default {
   position: relative;
   word-break: break-all;
   writing-mode: vertical-rl;
-  overflow-y: hidden;
-  overflow-x: scroll;
+  /* TODO: ここを指定すると組み込んだときにレイアウトが崩れる… */
+  /*overflow-y: hidden;*/
+  /*overflow-x: scroll;*/
 }
 .tategaki-container >>> p {
   margin: 0;
