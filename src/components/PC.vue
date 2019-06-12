@@ -60,7 +60,6 @@ import merge from 'lodash.merge'
 import browser from 'browser-detect'
 import Caret from './Caret.vue'
 import Selection from './Selection.vue'
-import StackBuffer from '../lib/stack_buffer'
 import { paste } from '../lib/copy_paste'
 import { horizontalMove, verticalMove } from '../lib/arrow_key_move'
 import { syncCaret } from '../lib/sync_caret'
@@ -87,7 +86,6 @@ export default {
   },
   data() {
     return {
-      stackBuffer: new StackBuffer(),
       editing: false,
       activeStyles: {},
       defaultStyles: {
@@ -122,8 +120,6 @@ export default {
       iOSKeyboardHeight: '450px',
       innerContent: '',
       previewContent: '',
-      stackContent: '', // MEMO: 変更 diff を取るためのもの（日本語変換中の変更を反映させない）
-      stackRange: {},
       compositing: false,
       memoRange: {
         startContainer: null,
@@ -190,16 +186,6 @@ export default {
       const nodes = this.$refs.editable.childNodes
       const html = cleanHTML(nodes)
       this.previewContent = html
-      if (!this.compositing) {
-        const memoRange = {}
-        memoRange.startContainer = this.stackRange.startContainer
-        memoRange.endContainer = this.stackRange.endContainer
-        memoRange.startOffset = this.stackRange.startOffset
-        memoRange.endOffset = this.stackRange.endOffset
-        this.stackBuffer.stack(this.stackContent, memoRange)
-        this.stackContent = html
-        this.stackRange = this.selectedRange()
-      }
       this.$emit('updated', html)
     },
     moveCaretAndNormalize() {
@@ -319,21 +305,6 @@ export default {
       this.compositing = false
       this.sync()
     },
-    undo() {
-      const buffer = this.stackBuffer.current
-      if (buffer) {
-        this.$refs.editable.innerHTML = buffer.content
-        this.$refs.preview.innerHTML = buffer.content
-        // MEMO: ctrl-z して文字入力したときにスタックを復元させる
-        this.stackContent = buffer.content
-        this.stackRange = buffer.range
-        // MEMO: Range オブジェクト自体は参照なので具体的な値をメモ化して復元させる
-        const newRange = document.createRange()
-        newRange.setStart(buffer.range.startContainer, buffer.range.startOffset)
-        newRange.setEnd(buffer.range.endContainer, buffer.range.endOffset)
-        this.focusAndMoveCaret({ target: this.$refs.editable }, newRange)
-      }
-    },
     resetSelectionFlag() {
       this.selectionAll = false
     }
@@ -346,11 +317,9 @@ export default {
     if (!this.content) {
       this.previewContent = '<p><br></p>'
       this.innerContent = '<p><br></p>'
-      this.stackContent = '<p><br></p>'
     } else {
       this.previewContent = this.content
       this.innerContent = this.content
-      this.stackContent = this.content
     }
     document.execCommand('DefaultParagraphSeparator', false, 'p')
     document.addEventListener('selectionchange', this.resetSelectionFlag)
