@@ -17,9 +17,11 @@ export const indexedHTML = content => {
 export const cleanHTML = nodes => {
   return [...nodes]
     .map(e => {
-      e.removeAttribute('data-key')
+      if (e.hasAttribute('data-key')) {
+        e.removeAttribute('data-key')
+      }
       ;[...e.childNodes].map(e => {
-        if (e.nodeType === 1) {
+        if (e.nodeType === 1 && e.hasAttribute('data-key')) {
           e.removeAttribute('data-key')
         }
       })

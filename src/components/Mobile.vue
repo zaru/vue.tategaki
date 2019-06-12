@@ -4,12 +4,14 @@
       <div
         contenteditable="true"
         class="tategaki-editable"
+        :class="this.editMode ? 'editing' : ''"
         data-key="editor"
         v-html="editContent"
         ref="editable"
         :style="editableStyle"
         :data-placeholder="placeholder"
         :data-placeholderactive="placeholderStatus"
+        @keydown.esc="blur()"
         @input="sync"
         @focus="setEditMode"
         @blur="setViewMode"
@@ -20,7 +22,7 @@
 
 <script>
 import merge from 'lodash.merge'
-import { indexedHTML, cleanHTML } from '../lib/format_html'
+import { indexedHTML, cleanHTML, extractText } from '../lib/format_html'
 import { paste } from '../lib/copy_paste'
 
 export default {
@@ -57,9 +59,6 @@ export default {
     editContent() {
       return indexedHTML(this.innerContent)
     },
-    contentHtml() {
-      return indexedHTML(this.previewContent)
-    },
     boxStyle() {
       return {
       }
@@ -71,18 +70,13 @@ export default {
     },
     editableStyle() {
       return {
-        writingMode: this.editMode ? 'horizontal-tb' : 'vertical-rl',
-        top: this.editMode ? '0px' : 'auto',
-        right: this.editMode ? '0px' : 'auto',
-        bottom: this.editMode ? '0px' : 'auto',
-        left: this.editMode ? '0px' : 'auto',
         width: this.editMode ? `${window.innerWidth}px` : 'auto',
         height: this.editMode ? `${window.innerHeight}px` : 'auto'
       }
     },
     placeholderStatus() {
-      return this.contentHtml === '<p data-key="0"></p>'
-    }
+      return extractText(this.previewContent) === ''
+    },
   },
   methods: {
     setEditMode() {
@@ -100,6 +94,9 @@ export default {
     pasteText(e) {
       paste(e)
       this.sync()
+    },
+    blur() {
+      document.activeElement.blur()
     }
   },
   created() {
@@ -108,8 +105,8 @@ export default {
   },
   mounted() {
     if (!this.content) {
-      this.innerContent = '<p></p>'
-      this.previewContent = '<p></p>'
+      this.innerContent = '<p><br></p>'
+      this.previewContent = '<p><br></p>'
     } else {
       this.innerContent = this.content
       this.previewContent = this.content
@@ -129,13 +126,25 @@ export default {
 }
 .tategaki-editable {
   box-sizing: border-box;
+  writing-mode: vertical-rl;
+}
+.tategaki-editable.editing {
+  z-index: 9999;
+  padding: 10px;
+  background: #fff;
   position: absolute;
+  writing-mode: horizontal-tb;
   top: 0px;
-  opacity: 1;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
 }
 [data-placeholder][data-placeholderactive='true']:before {
   content: attr(data-placeholder);
   opacity: 0.5;
+}
+.editing[data-placeholder][data-placeholderactive='true']:before {
+  position: absolute;
 }
 .tategaki-editable {
 }

@@ -68,14 +68,18 @@ export default Vue.extend({
   padding: 100px;
   box-sizing: border-box;
 }
+@media screen and (max-width: 600px) {
+  #app { padding: 10px; }
+}
+
 #app >>> p {
   padding: 0 5px;
   line-height: 225%;
 }
-  .container {
-    /*width: 300px;*/
-  }
-  h3 {
-    text-align: right;
-  }
+.container {
+  /*width: 300px;*/
+}
+h3 {
+  text-align: right;
+}
 </style>
