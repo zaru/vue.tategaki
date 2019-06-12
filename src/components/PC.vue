@@ -188,7 +188,11 @@ export default {
       this.previewContent = html
       this.$emit('updated', html)
     },
-    moveCaretAndNormalize() {
+    moveCaretAndNormalize(e) {
+      if (extractText(this.previewContent) === '') {
+        e.preventDefault()
+        return
+      }
       this.$refs.caret.moveCaret()
       normalizeHTML(this.$refs.editable.childNodes)
     },
