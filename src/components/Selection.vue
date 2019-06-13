@@ -132,8 +132,11 @@ export default {
         .closest('.tategaki-container')
         .getBoundingClientRect()
 
+      const fontSize = parseInt(window.getComputedStyle(range.startContainer.parentElement)['font-size'])
+      // MEMO: フォントによって Range の大きさが異なるため調整用の変数を用意する
+      let fontFamilyOffset = 0
       if (this.first.width === 0) {
-        this.first.width = parseInt(window.getComputedStyle(range.startContainer.parentElement)['font-size'])
+        this.first.width = fontSize
       }
 
       const previewRect = this.preview.getBoundingClientRect()
@@ -144,8 +147,9 @@ export default {
         textRange.setStart(range.startContainer, range.startOffset)
         textRange.setEnd(range.startContainer, range.startOffset + 1)
         const textRect = textRange.getBoundingClientRect()
+        fontFamilyOffset = (textRect.width - fontSize) / 2
         this.first.top = textRect.top - parentRect.top
-        this.first.left = textRect.left - parentRect.left - offsetLeft
+        this.first.left = textRect.left - parentRect.left - offsetLeft + fontFamilyOffset
       }
       if (range.startOffset !== range.endOffset && range.endOffset > 0) {
         textRange.setStart(range.endContainer, range.endOffset - 1)
@@ -160,7 +164,7 @@ export default {
 
         if (range.endOffset > 0) {
           this.last.width = this.first.width
-          this.last.left = rect.left - parentRect.left - offsetLeft
+          this.last.left = rect.left - parentRect.left - offsetLeft + fontFamilyOffset
           this.last.top = rect.top - parentRect.top
           textRange.setStart(range.endContainer, range.endOffset - 1)
           textRange.setEnd(range.endContainer, range.endOffset)
@@ -168,10 +172,10 @@ export default {
           this.last.height = textRect.y - parentRect.top + textRect.height
         }
 
-        this.middle.width = rect.width - this.first.width - this.last.width
+        this.middle.width = rect.width - this.first.width - this.last.width - fontFamilyOffset
         this.middle.height = rect.height
         this.middle.top = rect.top - parentRect.top
-        this.middle.left = rect.left - parentRect.left + this.first.width - offsetLeft
+        this.middle.left = rect.left - parentRect.left + this.first.width - offsetLeft + fontFamilyOffset
       } else {
         this.resetMiddleAndLast()
       }
