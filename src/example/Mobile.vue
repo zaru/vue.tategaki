@@ -82,4 +82,13 @@ export default Vue.extend({
 h3 {
   text-align: right;
 }
+/*todo:フォーカス時にこれあてる？*/
+body>*:not(.can-select) {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 </style>
