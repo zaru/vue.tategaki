@@ -26,12 +26,15 @@
       <div
         class="tategaki-preview"
         data-key="editor"
+        :contenteditable="previewEditable"
         :data-uid="uid"
         :data-placeholder="placeholder"
         :data-placeholderactive="placeholderStatus"
         v-html="contentHtml"
         ref="preview"
         @click="selected"
+        @mousedown="previewEditing = true"
+        @mousemove="selecting"
       ></div>
 
       <caret
@@ -127,10 +130,18 @@ export default {
         startOffset: 0,
         endOffset: 0
       },
-      selectionAll: false
+      selectionAll: false,
+      selectingPreview: false,
+      keepSelect: false,
+      keepSelectStyle: null,
+      previewEditing: false
     }
   },
   computed: {
+    previewEditable() {
+      // プレビューテキスト選択時に範囲を制限するために contenteditable にする
+      return this.previewEditing
+    },
     editContent() {
       return indexedHTML(this.innerContent)
     },
@@ -288,14 +299,6 @@ export default {
       // 範囲選択ではない場合はフォーカスさせる
       if (range.startContainer === range.endContainer && range.startOffset === range.endOffset) {
         this.focusAndMoveCaret(e, range, false)
-      } else {
-        // Range オブジェクトを利用して caret を同期させるために preview を
-        // editable に全く同じ node を入れるようにする
-        this.$refs.editable.childNodes.forEach((node, index) => {
-          node.replaceWith(this.$refs.preview.childNodes[index].cloneNode(true))
-        })
-
-        syncCaret(this.$refs.editable)
       }
     },
     pasteText(e) {
@@ -311,6 +314,52 @@ export default {
     },
     resetSelectionFlag() {
       this.selectionAll = false
+    },
+    inCurrent() {
+      // マウスアップしたときに、選択対象がこのコンポーネントかどうかをチェック
+      const sel = window.getSelection()
+      if (sel.rangeCount === 0) {
+        return false
+      }
+      return sel.getRangeAt(0).startContainer.parentElement.closest(`[data-uid="${this.uid}"]`)
+    },
+    selecting(e) {
+      let firstKeep = !this.keepSelect
+      this.keepSelect = e.buttons === 1 && e.button === 0
+      // 選択開始したときには、このエディタ部分のみ選択可能にする
+      if (firstKeep && this.keepSelect) {
+        // TODO: このアイデアでは user-select を成業する方法だが
+        // user-select は SelectionAPI に影響を与えないので厳しかった
+        // contenteditable にするアイデアが OK なら消す
+        // TODO: contenteditable にする方法も noco に組み込むと変になる
+        // というのと、改行後、文字入力して削除すると span が生成されてしまう
+        // this.keepSelectStyle = document.createElement('style')
+        // this.keepSelectStyle.innerHTML = `
+        //   body>*:not([data-uid="${this.uid}"]) {
+        //     -webkit-touch-callout: none;
+        //     -webkit-user-select: none;
+        //     -khtml-user-select: none;
+        //     -moz-user-select: none;
+        //     -ms-user-select: none;
+        //     user-select: none;
+        //   }
+        // `
+        // document.body.append(this.keepSelectStyle)
+      }
+
+    },
+    endSelection() {
+      // 対象のエディタ範囲から外れて選択しても大丈夫なように document に対しての mouseup イベント発火
+      if (this.inCurrent() && this.keepSelect) {
+        this.previewEditing = false
+        this.$refs.editable.childNodes.forEach((node, index) => {
+          node.replaceWith(this.$refs.preview.childNodes[index].cloneNode(true))
+        })
+
+        syncCaret(this.$refs.editable)
+        this.keepSelect = false
+        // this.keepSelectStyle.remove()
+      }
     }
   },
   created() {
@@ -327,9 +376,11 @@ export default {
     }
     document.execCommand('DefaultParagraphSeparator', false, 'p')
     document.addEventListener('selectionchange', this.resetSelectionFlag)
+    document.addEventListener('mouseup', this.endSelection)
   },
   destroyed() {
     document.removeEventListener('selectionchange', this.resetSelectionFlag)
+    document.removeEventListener('mouseup', this.endSelection)
   }
 }
 </script>
@@ -340,7 +391,7 @@ export default {
   word-break: break-all;
   writing-mode: vertical-rl;
   /* TODO: ここを指定すると組み込んだときにレイアウトが崩れる… */
-  /*overflow-y: hidden;*/
+  overflow-y: hidden;
   /*overflow-x: scroll;*/
 }
 .tategaki-container >>> p {
