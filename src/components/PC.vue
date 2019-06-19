@@ -414,6 +414,7 @@ export default {
   height: 100%;
 }
 .tategaki-preview {
+  -webkit-user-modify: read-write;
   box-sizing: border-box;
   opacity: 1;
   z-index: 2;
