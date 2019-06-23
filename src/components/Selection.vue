@@ -189,7 +189,7 @@ export default {
     },
     deselectAll() {
       this.preview.childNodes.forEach(node => {
-        node.style.background = 'none'
+        node.style.background = ''
       })
     }
   },
