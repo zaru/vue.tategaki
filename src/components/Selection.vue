@@ -159,7 +159,11 @@ export default {
           textRect.top - parentRect.top - this.first.top + textRect.height
       }
 
-      if (this.first.width < rect.width) {
+      // MEMO: ここでは複数行選択しているかどうかの判定をしている
+      // 本来やりたいことは厳密な選択幅とフォントサイズを比べたかったが
+      // フォントの種類によって選択幅とフォントサイズが異なるため、
+      // ざっくりと2倍以上の差は出ないだろうという甘い判定にしている
+      if (this.first.width * 2 <= rect.width) {
         this.first.height = rect.height - this.first.top
 
         if (range.endOffset > 0) {
