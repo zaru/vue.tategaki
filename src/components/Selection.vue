@@ -217,6 +217,5 @@ export default {
 .selection {
   position: absolute;
   background: #ffacb6;
-  /*opacity: 0.5;*/
 }
 </style>

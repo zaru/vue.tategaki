@@ -49,7 +49,6 @@ export default {
           fontSize: '16px'
         }
       },
-      originalContainerHeight: '',
       innerContent: '',
       previewContent: '',
       editMode: false
@@ -101,7 +100,6 @@ export default {
   },
   created() {
     this.activeStyles = merge(this.defaultStyles, this.styles)
-    this.originalContainerHeight = this.activeStyles.container.height
   },
   mounted() {
     if (!this.content) {

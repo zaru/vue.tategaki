@@ -111,29 +111,14 @@ export default {
           right: '0',
           bottom: '0',
           outline: false,
-          // このスタイルはもはや必要ないかもしれない
-          // boxShadow: '0 0 5px 0px rgba(0, 123, 255, .4)',
-          boxShadow: '',
           fontSize: '16px'
         }
       },
-      originalContainerHeight: '',
-      originalParentNode: null,
-      originalNextNode: null,
-      iOSKeyboardHeight: '450px',
       innerContent: '',
       previewContent: '',
       compositing: false,
-      memoRange: {
-        startContainer: null,
-        endContainer: null,
-        startOffset: 0,
-        endOffset: 0
-      },
       selectionAll: false,
-      selectingPreview: false,
       keepSelect: false,
-      keepSelectStyle: null,
       previewEditing: false
     }
   },
@@ -229,9 +214,6 @@ export default {
         }
       } else {
         const activeRange = this.getActiveRange(range, e.target)
-
-        // TODO: 削除する / ここでもとに戻すと TextNode が flat になるのでだめ
-        // this.$refs.editable.innerHTML = this.$refs.preview.innerHTML
         this.focusEditor(activeRange)
       }
     },
@@ -324,29 +306,7 @@ export default {
       return sel.getRangeAt(0).startContainer.parentElement.closest(`[data-uid="${this.uid}"]`)
     },
     selecting(e) {
-      let firstKeep = !this.keepSelect
       this.keepSelect = e.buttons === 1 && e.button === 0
-      // 選択開始したときには、このエディタ部分のみ選択可能にする
-      if (firstKeep && this.keepSelect) {
-        // TODO: このアイデアでは user-select を成業する方法だが
-        // user-select は SelectionAPI に影響を与えないので厳しかった
-        // contenteditable にするアイデアが OK なら消す
-        // TODO: contenteditable にする方法も noco に組み込むと変になる
-        // というのと、改行後、文字入力して削除すると span が生成されてしまう
-        // this.keepSelectStyle = document.createElement('style')
-        // this.keepSelectStyle.innerHTML = `
-        //   body>*:not([data-uid="${this.uid}"]) {
-        //     -webkit-touch-callout: none;
-        //     -webkit-user-select: none;
-        //     -khtml-user-select: none;
-        //     -moz-user-select: none;
-        //     -ms-user-select: none;
-        //     user-select: none;
-        //   }
-        // `
-        // document.body.append(this.keepSelectStyle)
-      }
-
     },
     endSelection() {
       // 対象のエディタ範囲から外れて選択しても大丈夫なように document に対しての mouseup イベント発火
@@ -358,13 +318,11 @@ export default {
 
         syncCaret(this.$refs.editable)
         this.keepSelect = false
-        // this.keepSelectStyle.remove()
       }
     }
   },
   created() {
     this.activeStyles = merge(this.defaultStyles, this.styles)
-    this.originalContainerHeight = this.activeStyles.container.height
   },
   mounted() {
     if (!this.content) {
@@ -390,9 +348,7 @@ export default {
   position: relative;
   word-break: break-all;
   writing-mode: vertical-rl;
-  /* TODO: ここを指定すると組み込んだときにレイアウトが崩れる… */
   overflow-y: hidden;
-  /*overflow-x: scroll;*/
 }
 .tategaki-container >>> p {
   margin: 0;
@@ -419,7 +375,6 @@ export default {
   box-sizing: border-box;
   opacity: 1;
   z-index: 2;
-  /* MEMO: ここを absolute にしていたけど、それだと組み込むときにつぶれるので relative へ、もし何らかの不具合があったらここがあやしい*/
   position: relative;
   top: 0px;
   right: 0px;
@@ -436,7 +391,5 @@ export default {
 .tategaki-preview {
   user-select: text;
   -webkit-user-select: text;
-  /* なぜか透明にすると Chrome で文字列削除時に span が勝手に挿入される… */
-  /*caret-color: transparent;*/
 }
 </style>
