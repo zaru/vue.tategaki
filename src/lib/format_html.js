@@ -41,5 +41,5 @@ export const normalizeHTML = nodes => {
 export const extractText = content => {
   const div = document.createElement('div')
   div.innerHTML = content
-  return div.innerText
+  return div.innerText.replace(/\r?\n/g, '')
 }
