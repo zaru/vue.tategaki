@@ -2,9 +2,9 @@
   <div class="tategaki" ref="box" :style="boxStyle">
     <div class="tategaki-container" ref="container" :style="containerStyle">
       <div
-        contenteditable="true"
+        :contenteditable="editMode"
         class="tategaki-editable"
-        :class="this.editMode ? 'editing' : ''"
+        :class="editMode ? 'editing' : ''"
         data-key="editor"
         v-html="editContent"
         ref="editable"
@@ -14,9 +14,13 @@
         @keydown.esc="blur()"
         @keydown.enter.exact="checkBreakLine"
         @input="sync"
-        @focus="setEditMode"
+        @click="setEditMode"
         @blur="setViewMode"
       ></div>
+      <close-button
+        :close="setViewMode"
+        :edit-mode="editMode"
+      ></close-button>
     </div>
   </div>
 </template>
@@ -25,10 +29,11 @@
 import merge from 'lodash.merge'
 import { indexedHTML, cleanHTML, extractText } from '../lib/format_html'
 import { paste } from '../lib/copy_paste'
+import CloseButton from './CloseButton.vue'
 
 export default {
   name: 'Mobile',
-  components: {},
+  components: { CloseButton },
   props: {
     content: {
       type: String
@@ -84,11 +89,20 @@ export default {
   },
   methods: {
     setEditMode() {
-      this.editMode = true
-      window.scrollTo(0, 0)
+      if (!this.editMode) {
+        document.body.append(this.$refs.container)
+        this.editMode = true
+        window.scrollTo(0, 0)
+        setTimeout(() => {
+          this.$refs.editable.focus()
+        }, 10)
+      }
     },
     setViewMode() {
-      this.editMode = false
+      if (this.editMode) {
+        this.$refs.box.append(this.$refs.container)
+        this.editMode = false
+      }
     },
     sync() {
       const nodes = this.$refs.editable.childNodes
@@ -139,14 +153,15 @@ export default {
 }
 .tategaki-editable.editing {
   z-index: 9999;
-  padding: 10px;
+  padding: 20px 10px 10px 10px;
   background: #fff;
   position: absolute;
   writing-mode: horizontal-tb;
-  top: 0px;
-  right: 0px;
-  bottom: 0px;
-  left: 0px;
+  outline: none;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 [data-placeholder][data-placeholderactive='true']:before {
   content: attr(data-placeholder);
