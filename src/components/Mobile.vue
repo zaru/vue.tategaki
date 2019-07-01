@@ -80,11 +80,12 @@ export default {
     },
     placeholderStatus() {
       return extractText(this.previewContent) === ''
-    },
+    }
   },
   methods: {
     setEditMode() {
       this.editMode = true
+      window.scrollTo(0, 0)
     },
     setViewMode() {
       this.editMode = false
