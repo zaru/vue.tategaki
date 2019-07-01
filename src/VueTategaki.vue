@@ -4,6 +4,7 @@
     :content="content"
     :styles="styles"
     :placeholder="placeholder"
+    :multiple="multiple"
     :uid="uid()"
     @updated="update"
   ></component>
@@ -27,6 +28,10 @@ export default {
     },
     placeholder: {
       type: String
+    },
+    multiple: {
+      type: Boolean,
+      default: true
     }
   },
   data() {

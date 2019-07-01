@@ -17,6 +17,7 @@
         @keydown.39.exact.prevent.stop="arrowKeyMove"
         @keydown.37.exact.prevent.stop="arrowKeyMove"
         @keydown.enter.exact="moveCaretAndNormalize"
+        @keydown.shift.enter.exact="moveCaretAndNormalize"
         @keydown.meta.65="selectionAll = true"
         @keydown.delete.exact="moveCaretAndNormalize"
         @keydown.meta.88="moveCaretAndNormalize"
@@ -84,6 +85,10 @@ export default {
     },
     uid: {
       type: String,
+      require: true
+    },
+    multiple: {
+      type: Boolean,
       require: true
     }
   },
@@ -185,6 +190,10 @@ export default {
       this.$emit('updated', html)
     },
     moveCaretAndNormalize(e) {
+      if (!this.multiple) {
+        e.preventDefault()
+        return
+      }
       if (extractText(this.previewContent) === '') {
         e.preventDefault()
         return

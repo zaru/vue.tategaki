@@ -12,6 +12,7 @@
         :data-placeholder="placeholder"
         :data-placeholderactive="placeholderStatus"
         @keydown.esc="blur()"
+        @keydown.enter.exact="checkBreakLine"
         @input="sync"
         @focus="setEditMode"
         @blur="setViewMode"
@@ -37,6 +38,10 @@ export default {
     },
     placeholder: {
       type: String
+    },
+    multiple: {
+      type: Boolean,
+      require: true
     }
   },
   data() {
@@ -96,6 +101,11 @@ export default {
     },
     blur() {
       document.activeElement.blur()
+    },
+    checkBreakLine(e) {
+      if (!this.multiple) {
+        e.preventDefault()
+      }
     }
   },
   created() {
